@@ -13,6 +13,7 @@ export default function MyLinkBtn({
   children,
   size = "md",
   btnType = "solid",
+  className,
   ...rest
 }: LinkProps & BtnAndLinkProps) {
   let customClassName = SolidBtnMdClassName;
@@ -33,7 +34,7 @@ export default function MyLinkBtn({
   }
 
   return (
-    <Link {...rest} className={customClassName}>
+    <Link {...rest} className={`${customClassName} ${className}`}>
       {children}
     </Link>
   );

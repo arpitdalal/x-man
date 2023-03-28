@@ -22,7 +22,7 @@ export async function loader({ request }: LoaderArgs) {
   return await authenticated(
     request,
     async (user) => {
-      let { profile, error } = await getProfileById(user.id);
+      const { profile, error } = await getProfileById(user.id);
       if (error || !profile) {
         return json<AppLoaderData>({});
       }

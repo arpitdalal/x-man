@@ -168,7 +168,7 @@ export default function New() {
                 id="amount"
                 type="text"
                 name="amount"
-                inputMode="numeric"
+                inputMode="decimal"
                 pattern="[0-9]*"
                 defaultValue={actionData?.fields?.title || ""}
                 required
