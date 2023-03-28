@@ -341,7 +341,9 @@ function Card({
             : null}
         </div>
       </div>
-      <p className="text-xl mt-4">${expenseOrIncome.amount}</p>
+      <p className="text-xl mt-4">
+        {getFormattedCurrency(Number(expenseOrIncome.amount))}
+      </p>
       <p className="text-md text-night-300 italic mt-5">
         added {getRelativeTime(expenseOrIncome.created_at || "")}
       </p>
