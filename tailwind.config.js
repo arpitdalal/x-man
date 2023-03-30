@@ -2,7 +2,10 @@ const defaultTheme = require("tailwindcss/defaultTheme");
 const { blackA } = require("@radix-ui/colors");
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./app/**/*.{ts,tsx,jsx,js}"],
+  content: [
+    "./app/**/*.{ts,tsx,jsx,js}",
+    "./node_modules/react-tailwindcss-select/dist/index.esm.js",
+  ],
   darkMode: "class",
   theme: {
     extend: {
@@ -25,6 +28,17 @@ module.exports = {
           600: "#8c6eff",
           700: "#6A44FF",
         },
+        "dark-muted": {
+          100: "rgba(0, 0, 0, 0.1)",
+          200: "rgba(0, 0, 0, 0.2)",
+          300: "rgba(0, 0, 0, 0.3)",
+          400: "rgba(0, 0, 0, 0.4)",
+          500: "rgba(0, 0, 0, 0.5)",
+          600: "rgba(0, 0, 0, 0.6)",
+          700: "rgba(0, 0, 0, 0.7)",
+          800: "rgba(0, 0, 0, 0.8)",
+          900: "rgba(0, 0, 0, 0.9)",
+        },
         accent: {
           purple: "#6A44FF",
           pink: "#F183FF",
@@ -39,9 +53,6 @@ module.exports = {
       },
       maxWidth: {
         "8xl": "1440px",
-      },
-      borderWidth: {
-        1: "1px",
       },
     },
   },

@@ -18,6 +18,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import Button from "~/components/Button";
 import MyLinkBtn from "~/components/MyLinkBtn";
 import useRedirectTo from "~/hooks/useRedirectTo";
+import ModalMessage from "~/components/ModalMessage";
 
 export async function loader({ request, params }: LoaderArgs) {
   const redirectTo = new URL(request.url).searchParams.get("redirectTo");
@@ -99,7 +100,12 @@ export default function Delete() {
   const redirectTo = useRedirectTo();
 
   if (!data) {
-    return <div>Not found</div>;
+    return (
+      <ModalMessage
+        title="Not found"
+        message="We couldn't find an expense or an income. Please head back to the month view"
+      />
+    );
   }
 
   const expenseOrIncome = JSON.parse(data) as unknown as Income;
@@ -108,7 +114,7 @@ export default function Delete() {
     <Dialog.Root defaultOpen modal>
       <Dialog.Portal>
         <Dialog.Overlay className="bg-[rgba(0,0,0,0.2)] backdrop-blur data-[state=open]:animate-overlayShow fixed inset-0" />
-        <Dialog.Content className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-day-100 dark:bg-night-500 p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px]  focus:outline-none dark:shadow-[hsl(0_0%_0%_/_35%)_0px_10px_38px_-10px,_hsl(0_0%_0%_/_35%)_0px_10px_20px_-15px]">
+        <Dialog.Content className="overflow-auto data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-day-100 dark:bg-night-500 p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px]  focus:outline-none dark:shadow-[hsl(0_0%_0%_/_35%)_0px_10px_38px_-10px,_hsl(0_0%_0%_/_35%)_0px_10px_20px_-15px]">
           <Dialog.Title className="m-0 text-[17px] font-medium">
             Are you sure you want to delete{" "}
             <span className="italic font-bold mr-[2px]">

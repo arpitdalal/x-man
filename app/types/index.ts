@@ -4,6 +4,7 @@ import type { Database } from "~/types/supabase";
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Expense = Database["public"]["Tables"]["expenses"]["Row"];
 export type Income = Database["public"]["Tables"]["income"]["Row"];
+export type Category = Database["public"]["Tables"]["categories"]["Row"];
 export type Providers = Extract<Provider, "google" | "facebook">;
 
 export type Error =

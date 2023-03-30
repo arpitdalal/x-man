@@ -5,9 +5,11 @@ import {
   redirect,
 } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
-import { safeRedirect, unauthorized } from "remix-utils";
+import { promiseHash, safeRedirect, unauthorized } from "remix-utils";
 import authenticated, {
   authCookie,
+  getAllExpenseCategories,
+  getAllIncomeCategories,
   getExpenseById,
   getIncomeById,
   updateExpense,
@@ -19,8 +21,22 @@ import * as Dialog from "@radix-ui/react-dialog";
 import useRedirectTo from "~/hooks/useRedirectTo";
 import Button from "~/components/Button";
 import MyLinkBtn from "~/components/MyLinkBtn";
-import type { Income } from "~/types";
+import type { Category, Income } from "~/types";
+import MyMultiSelect from "~/components/MyMultiSelect";
+import { getOptionsFromArray, getStringFromOptions } from "~/utils/client";
+import type {
+  Option,
+  SelectValue,
+} from "react-tailwindcss-select/dist/components/type";
+import { useState } from "react";
+import ModalMessage from "~/components/ModalMessage";
 
+type LoaderData = {
+  message: string;
+  categories: Array<Category>;
+  expenseOrIncome: Income;
+  isIncome: "true" | "false";
+};
 export async function loader({ request, params }: LoaderArgs) {
   const redirectTo = new URL(request.url).searchParams.get("redirectTo");
 
@@ -31,7 +47,6 @@ export async function loader({ request, params }: LoaderArgs) {
   if (!userId || typeof userId !== "string") {
     throw unauthorized({
       message: "You must be logged in to access this page",
-      data: null,
     });
   }
 
@@ -43,27 +58,59 @@ export async function loader({ request, params }: LoaderArgs) {
   }
 
   if (isIncome === "false") {
-    const { expense, error } = await getExpenseById({ expenseId: id, userId });
+    const {
+      expense: { expense, error },
+      categories: { expenseCategories },
+    } = await promiseHash({
+      expense: getExpenseById({ expenseId: id, userId }),
+      categories: getAllExpenseCategories({ userId }),
+    });
+    // const { expense, error } = await getExpenseById({ expenseId: id, userId });
     if (!expense || error) {
-      return json({ message: "Not found.", data: null, isIncome }, 404);
+      return json(
+        {
+          message: "Not found.",
+          expenseOrIncome: null,
+          isIncome,
+          categories: [],
+        },
+        404
+      );
     }
 
     return json({
-      data: JSON.stringify(expense),
+      expenseOrIncome: expense,
       message: "",
       isIncome,
+      categories: expenseCategories || [],
     });
   }
 
-  const { income, error } = await getIncomeById({ incomeId: id, userId });
+  const {
+    income: { income, error },
+    categories: { incomeCategories },
+  } = await promiseHash({
+    income: getIncomeById({ incomeId: id, userId }),
+    categories: getAllIncomeCategories({ userId }),
+  });
+  // const { income, error } = await getIncomeById({ incomeId: id, userId });
   if (!income || error) {
-    return json({ message: "Not found.", data: null, isIncome }, 404);
+    return json(
+      {
+        message: "Not found.",
+        expenseOrIncome: null,
+        isIncome,
+        categories: [],
+      },
+      404
+    );
   }
 
   return json({
-    data: JSON.stringify(income),
+    expenseOrIncome: income,
     message: "",
     isIncome,
+    categories: incomeCategories,
   });
 }
 
@@ -91,6 +138,7 @@ export async function action({ params, request }: ActionArgs) {
 
       const title = form.get("title");
       const amount = form.get("amount");
+      const categories = form.get("categories");
       const addInTenPer = form.get("addInTenPer") ? true : false;
       const redirectTo = form.get("redirectTo") || "/app";
 
@@ -99,6 +147,7 @@ export async function action({ params, request }: ActionArgs) {
         !amount ||
         typeof title !== "string" ||
         typeof amount !== "string" ||
+        typeof categories !== "string" ||
         typeof redirectTo !== "string"
       ) {
         return json<ActionData>(
@@ -121,7 +170,7 @@ export async function action({ params, request }: ActionArgs) {
           query: {
             title,
             amount: String(amount),
-            categories: null,
+            categories,
           },
         });
 
@@ -147,7 +196,7 @@ export async function action({ params, request }: ActionArgs) {
         query: {
           title,
           amount: String(amount),
-          categories: null,
+          categories,
           addInTenPer,
         },
       });
@@ -177,24 +226,46 @@ export async function action({ params, request }: ActionArgs) {
 }
 
 export default function Edit() {
-  const loaderData = useLoaderData<typeof loader>();
+  const { expenseOrIncome, categories, ...loaderData } =
+    useLoaderData<LoaderData>();
   const actionData = useActionData<ActionData>();
-  const data = loaderData.data;
   const isIncome = loaderData.isIncome === "true" ? true : false;
   const redirectTo = useRedirectTo();
+  const initialCategoriesArray = getOptionsFromArray(
+    expenseOrIncome?.categories?.split(",") || []
+  );
+  const [selectedCategories, setSelectedCategories] = useState<SelectValue>(
+    initialCategoriesArray.length >= 0 ? initialCategoriesArray : null
+  );
+  const [title, setTitle] = useState<string>(expenseOrIncome?.title || "");
+  const [amount, setAmount] = useState<string>(expenseOrIncome?.amount || "");
 
-  if (!data) {
-    return <div>Not found</div>;
+  if (!expenseOrIncome) {
+    return (
+      <ModalMessage
+        title="Not found"
+        message="We couldn't find an expense or an income. Please head back to the month view"
+      />
+    );
   }
 
-  const expenseOrIncome = JSON.parse(data) as unknown as Income;
+  const categoryNames =
+    categories?.map((category) => {
+      return category.name || "";
+    }) || [];
+
+  const shouldSubmitBtnBeDisabled =
+    title === expenseOrIncome?.title &&
+    amount === expenseOrIncome?.amount &&
+    getStringFromOptions(selectedCategories as unknown as Array<Option>) ===
+      getStringFromOptions(initialCategoriesArray);
 
   return (
     <div>
       <Dialog.Root defaultOpen modal>
         <Dialog.Portal>
           <Dialog.Overlay className="bg-[rgba(0,0,0,0.2)] backdrop-blur data-[state=open]:animate-overlayShow fixed inset-0" />
-          <Dialog.Content className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-day-100 dark:bg-night-500 p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px]  focus:outline-none dark:shadow-[hsl(0_0%_0%_/_35%)_0px_10px_38px_-10px,_hsl(0_0%_0%_/_35%)_0px_10px_20px_-15px]">
+          <Dialog.Content className="overflow-auto data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-day-100 dark:bg-night-500 p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px]  focus:outline-none dark:shadow-[hsl(0_0%_0%_/_35%)_0px_10px_38px_-10px,_hsl(0_0%_0%_/_35%)_0px_10px_20px_-15px]">
             <Dialog.Title className="m-0 text-[17px] font-medium">
               Edit{" "}
               <span className="italic font-bold">{expenseOrIncome.title}</span>
@@ -212,9 +283,8 @@ export default function Edit() {
                   id="title"
                   type="text"
                   name="title"
-                  defaultValue={
-                    actionData?.fields?.title || expenseOrIncome.title
-                  }
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                   required
                 />
               </div>
@@ -225,10 +295,9 @@ export default function Edit() {
                   type="text"
                   name="amount"
                   inputMode="decimal"
-                  pattern="[0-9]*"
-                  defaultValue={
-                    actionData?.fields?.title || expenseOrIncome.amount
-                  }
+                  pattern="[0-9.]*"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
                   required
                 />
               </div>
@@ -251,8 +320,15 @@ export default function Edit() {
                   </Switch.Root>
                 </div>
               ) : null}
+              <MyMultiSelect
+                categories={categoryNames}
+                selectedCategories={selectedCategories}
+                setSelectedCategories={setSelectedCategories}
+              />
               <div className="mt-3 flex gap-2">
-                <Button type="submit">Edit</Button>
+                <Button type="submit" disabled={shouldSubmitBtnBeDisabled}>
+                  Edit
+                </Button>
                 <MyLinkBtn
                   btnType="outline"
                   to={redirectTo || "/app"}

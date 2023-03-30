@@ -10,6 +10,7 @@ import { ThemeContext } from "~/utils/client/ThemeContext";
 import authenticated, { getProfileById } from "~/lib/supabase.server";
 import type { Mode } from "~/root";
 import type { Profile } from "~/types";
+import MyNavLink from "~/components/MyNavLink";
 
 export const meta: MetaFunction = () => {
   return { title: "Dashboard | X-Man" };
@@ -90,15 +91,16 @@ export function ErrorBoundary({ error }: { error: Error }) {
 
 function Header({ profile }: { profile: Profile }) {
   return (
-    <header className="py-3 px-5 lg:px-20 shadow-md dark:shadow-night-500">
-      <div className="max-w-8xl mx-auto flex justify-between items-center">
-        <Link to="/" className="text-5xl">
+    <header className="pt-3">
+      <div className="max-w-8xl px-5 lg:px-20 mx-auto flex justify-between items-center">
+        <Link to="/" className="text-4xl sm:text-5xl">
           X-Man
         </Link>
         <Form method="post" action="/api/logout">
           <Button
             type="submit"
             className="flex gap-3 justify-between items-center"
+            size="sm"
           >
             <img
               src={profile.avatar_url || ""}
@@ -109,6 +111,13 @@ function Header({ profile }: { profile: Profile }) {
           </Button>
         </Form>
       </div>
+      <div className="mt-4 bg-day-200 dark:bg-night-500">
+        <div className="max-w-8xl mx-auto flex px-5 lg:px-20 gap-3">
+          <MyNavLink to="dashboard">Dashboard</MyNavLink>
+          <MyNavLink to="categories">Categories</MyNavLink>
+          <MyNavLink to="presets">Presets</MyNavLink>
+        </div>
+      </div>
     </header>
   );
 }
@@ -117,7 +126,7 @@ function Footer() {
   const { mode, setMode } = useContext(ThemeContext);
 
   return (
-    <footer className="py-3 px-5 lg:px-20 border-t-1 border-night-400 dark:border-night-300 border-opacity-20">
+    <footer className="py-3 px-5 lg:px-20 border-t border-night-400 dark:border-night-300 border-opacity-20">
       <div className="max-w-8xl mx-auto flex justify-between items-center">
         <p className="text-2xl font-bold">X-Man</p>
         <div>

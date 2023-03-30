@@ -681,3 +681,96 @@ export async function deleteIncome({ incomeId, userId }: DeleteIncomeArgs) {
     };
   }
 }
+
+type GetAllExpenseCategoriesArgs = {
+  userId: User["id"];
+};
+export async function getAllExpenseCategories({
+  userId,
+}: GetAllExpenseCategoriesArgs) {
+  try {
+    const { data: categories, error } = await supabaseAdmin
+      .from("categories")
+      .select()
+      .eq("expense", true)
+      .in("user_id", ["*", userId]);
+    if (error || !categories) {
+      console.log("getAllCategories", error);
+      return {
+        error: error,
+      };
+    }
+
+    return {
+      expenseCategories: categories,
+    };
+  } catch (error) {
+    // TODO: log error nicely
+    console.log("getAllCategories", error);
+    return {
+      error: "Something went wrong",
+    };
+  }
+}
+
+type GetAllIncomeCategoriesArgs = {
+  userId: User["id"];
+};
+export async function getAllIncomeCategories({
+  userId,
+}: GetAllIncomeCategoriesArgs) {
+  try {
+    const { data: categories, error } = await supabaseAdmin
+      .from("categories")
+      .select()
+      .eq("expense", false)
+      .in("user_id", ["*", userId]);
+    if (error || !categories) {
+      console.log("getAllCategories", error);
+      return {
+        error: error,
+      };
+    }
+
+    return {
+      incomeCategories: categories,
+    };
+  } catch (error) {
+    // TODO: log error nicely
+    console.log("getAllCategories", error);
+    return {
+      error: "Something went wrong",
+    };
+  }
+}
+
+type GetAllDefaultCategoriesArgs = {
+  userId: User["id"];
+  expense: boolean;
+};
+export async function getAllDefaultCategories({
+  userId,
+  expense,
+}: GetAllDefaultCategoriesArgs) {
+  try {
+    const { data: categories, error } = await supabaseAdmin
+      .from("categories")
+      .select()
+      .eq("expense", expense)
+      .eq("user_id", "*");
+    if (error || !categories) {
+      console.log("getAllDefaultCategories", error);
+      return {
+        success: false,
+      };
+    }
+
+    return { categories };
+  } catch (error) {
+    // TODO: log error nicely
+    console.log("getAllDefaultCategories", error);
+    return {
+      error: "Something went wrong",
+    };
+  }
+}

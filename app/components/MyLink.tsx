@@ -4,7 +4,7 @@ export default function MyLink({ children, className, ...rest }: LinkProps) {
   return (
     <Link
       {...rest}
-      className={`underline hover:text-accent-purple ${className}`}
+      className={`transition-colors underline hover:text-accent-purple ${className}`}
     >
       {children}
     </Link>

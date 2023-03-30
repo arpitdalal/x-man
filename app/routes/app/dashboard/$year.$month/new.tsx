@@ -1,18 +1,85 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import { Form, useActionData } from "@remix-run/react";
+import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import TextInput from "~/components/TextInput";
 import useRedirectTo from "~/hooks/useRedirectTo";
-import { type ActionArgs, json, redirect } from "@remix-run/node";
+import {
+  type ActionArgs,
+  type LoaderArgs,
+  json,
+  redirect,
+} from "@remix-run/node";
 import authenticated, {
+  authCookie,
+  getAllIncomeCategories,
+  getAllExpenseCategories,
   insertExpense,
   insertIncome,
 } from "~/lib/supabase.server";
-import { safeRedirect, unauthorized } from "remix-utils";
+import { promiseHash, safeRedirect, unauthorized } from "remix-utils";
 import Button from "~/components/Button";
 import * as Switch from "@radix-ui/react-switch";
 import { useContext, useState } from "react";
 import { DateContext } from "~/utils/client/DateContext";
 import MyLinkBtn from "~/components/MyLinkBtn";
+import MyMultiSelect from "~/components/MyMultiSelect";
+import type { SelectValue } from "react-tailwindcss-select/dist/components/type";
+
+export async function loader({ request }: LoaderArgs) {
+  const authSession = await authCookie.getSession(
+    request.headers.get("Cookie")
+  );
+  const userId = authSession.get("user_id");
+  if (!userId || typeof userId !== "string") {
+    throw unauthorized({
+      message: "You must be logged in to access this page",
+    });
+  }
+
+  const {
+    expenseCategories: { expenseCategories, error: expenseCategoriesError },
+    incomeCategories: { incomeCategories, error: incomeCategoriesError },
+  } = await promiseHash({
+    expenseCategories: getAllExpenseCategories({ userId }),
+    incomeCategories: getAllIncomeCategories({ userId }),
+  });
+
+  if (
+    incomeCategoriesError &&
+    !incomeCategories &&
+    expenseCategoriesError &&
+    !expenseCategories
+  ) {
+    return json({
+      expenseCategories: [],
+      incomeCategories: [],
+    });
+  } else if (
+    incomeCategoriesError &&
+    !incomeCategories &&
+    !expenseCategoriesError &&
+    expenseCategories
+  ) {
+    return json({
+      expenseCategories,
+      incomeCategories: [],
+    });
+  } else if (
+    !incomeCategoriesError &&
+    incomeCategories &&
+    expenseCategoriesError &&
+    !expenseCategories
+  ) {
+    return json({
+      expenseCategories: [],
+      incomeCategories,
+    });
+  }
+
+  return json({
+    expenseCategories,
+    incomeCategories,
+  });
+}
 
 type ActionData = {
   formError?: string;
@@ -35,6 +102,7 @@ export async function action({ params, request }: ActionArgs) {
 
       const title = form.get("title");
       const amount = form.get("amount");
+      const categories = form.get("categories");
       const isExpense = form.get("isExpense") ? true : false;
       const addInTenPer = form.get("addInTenPer") ? true : false;
       const date = form.get("date") || new Date().getDate().toString();
@@ -45,6 +113,7 @@ export async function action({ params, request }: ActionArgs) {
         !amount ||
         typeof title !== "string" ||
         typeof amount !== "string" ||
+        typeof categories !== "string" ||
         typeof redirectTo !== "string" ||
         typeof date !== "string"
       ) {
@@ -71,7 +140,7 @@ export async function action({ params, request }: ActionArgs) {
             day: String(date),
             month: String(month),
             year: String(year),
-            categories: null,
+            categories,
           },
         });
 
@@ -100,7 +169,7 @@ export async function action({ params, request }: ActionArgs) {
           day: String(date),
           month: String(month),
           year: String(year),
-          categories: null,
+          categories,
           addInTenPer,
         },
       });
@@ -129,6 +198,8 @@ export async function action({ params, request }: ActionArgs) {
 }
 
 export default function New() {
+  const { expenseCategories, incomeCategories } =
+    useLoaderData<typeof loader>();
   const actionData = useActionData<ActionData>();
   const [isExpense, setIsExpense] = useState(
     actionData?.fields?.isExpense !== undefined
@@ -137,12 +208,23 @@ export default function New() {
   );
   const redirectTo = useRedirectTo();
   const { date } = useContext(DateContext);
+  const [selectedCategories, setSelectedCategories] =
+    useState<SelectValue>(null);
+
+  const expenseCategoryNames =
+    expenseCategories?.map((expenseCategory) => {
+      return expenseCategory.name || "";
+    }) || [];
+  const incomeCategoryNames =
+    incomeCategories?.map((incomeCategory) => {
+      return incomeCategory.name || "";
+    }) || [];
 
   return (
     <Dialog.Root defaultOpen modal>
       <Dialog.Portal>
         <Dialog.Overlay className="bg-[rgba(0,0,0,0.2)] backdrop-blur data-[state=open]:animate-overlayShow fixed inset-0" />
-        <Dialog.Content className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-day-100 dark:bg-night-500 p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px]  focus:outline-none dark:shadow-[hsl(0_0%_0%_/_35%)_0px_10px_38px_-10px,_hsl(0_0%_0%_/_35%)_0px_10px_20px_-15px]">
+        <Dialog.Content className="overflow-auto data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-day-100 dark:bg-night-500 p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px]  focus:outline-none dark:shadow-[hsl(0_0%_0%_/_35%)_0px_10px_38px_-10px,_hsl(0_0%_0%_/_35%)_0px_10px_20px_-15px]">
           <Dialog.Title className="m-0 text-[17px] font-medium">
             Add Expense or Income
           </Dialog.Title>
@@ -169,7 +251,7 @@ export default function New() {
                 type="text"
                 name="amount"
                 inputMode="decimal"
-                pattern="[0-9]*"
+                pattern="[0-9.]*"
                 defaultValue={actionData?.fields?.title || ""}
                 required
               />
@@ -205,12 +287,20 @@ export default function New() {
                 </Switch.Root>
               </div>
             ) : null}
+            <MyMultiSelect
+              categories={
+                isExpense ? expenseCategoryNames : incomeCategoryNames
+              }
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
+            />
             <div className="mt-3 flex gap-2">
               <Button type="submit">Add</Button>
               <MyLinkBtn
                 btnType="outline"
                 to={redirectTo || "/app"}
                 type="submit"
+                className="border-b"
               >
                 Cancel
               </MyLinkBtn>

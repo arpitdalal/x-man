@@ -250,7 +250,7 @@ export default function Month() {
             </div>
           ) : null}
         </div>
-        <p className="mt-4 text-3xl font-bold">
+        <p className="mt-4 text-3xl font-bold border-t border-night-400 pt-4">
           {monthName}'s balance:{" "}
           <span
             className={`${
@@ -264,7 +264,7 @@ export default function Month() {
           <div className="text-xl md:text-2xl text-night-700 bg-green-200 rounded-lg px-4 md:px-10 py-6 text-center">
             <p className="font-bold">Income</p>
             <p className="mt-4">Total: {getFormattedCurrency(totalIncome)}</p>
-            <div className="mt-3 text-base bg-[rgba(0,0,0,0.1)] rounded-lg text-left py-1 px-3">
+            <div className="mt-3 text-base bg-dark-muted-100 rounded-lg text-left py-1 px-3">
               <p>{getFormattedCurrency(totalTenPer)} is 10%</p>
             </div>
           </div>
@@ -309,7 +309,7 @@ function Card({
 
   return (
     <div
-      className={`md:w-80 py-3 px-6 text-night-700 border-1 flex flex-col rounded-lg ${
+      className={`md:w-80 py-3 px-6 text-night-700 border flex flex-col rounded-lg ${
         isIncome ? "bg-green-200" : "bg-red-200"
       }`}
     >

@@ -20,10 +20,10 @@ export default function TextInput({
         {label} {required ? <span className="text-accent-red">*</span> : null}
       </label>
       <input
-        {...rest}
         id={id}
         required={required}
-        className="rounded-md dark:text-day-100 dark:bg-night-700"
+        className="rounded-md focus:outline-none dark:text-day-100 dark:bg-night-700 focus:border-night-700 dark:focus:border-day-100 focus:ring-0"
+        {...rest}
       />
     </>
   );
