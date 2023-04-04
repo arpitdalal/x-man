@@ -42,6 +42,7 @@ module.exports = {
         },
         accent: {
           purple: "#6A44FF",
+          "dark-purple": "#572DF9",
           pink: "#F183FF",
           yellow: "#FFBE3F",
           "yellow-muted": "#FFD262",

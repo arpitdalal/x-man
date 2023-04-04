@@ -233,7 +233,7 @@ export default function Month() {
 
   return (
     <>
-      <div>
+      <div className="px-5 pt-5 lg:px-20">
         <div className="flex items-center gap-4">
           <div className="flex">
             <MyTooltip title="Previous month">
@@ -262,7 +262,10 @@ export default function Month() {
             </div>
           ) : null}
         </div>
-        <p className="mt-4 border-t border-night-400 pt-4 text-3xl font-bold">
+      </div>
+      <div className="mt-4 border-t border-night-400 border-opacity-20 dark:border-night-300"></div>
+      <div className="px-5 pt-4 lg:px-20">
+        <p className="text-3xl font-bold">
           {monthName}'s balance:{" "}
           <span
             className={`${
@@ -285,45 +288,53 @@ export default function Month() {
             <p className="mt-4">Total: {getFormattedCurrency(totalExpense)}</p>
           </div>
         </div>
+        <div className="mt-8 flex flex-row gap-3">
+          <MyLinkBtn
+            to={`expenses/new?redirectTo=${location.pathname}`}
+            className="bg-red-200 text-night-700 transition-colors hover:bg-red-300"
+          >
+            Add expense
+          </MyLinkBtn>
+          <MyLinkBtn
+            to={`income/new?redirectTo=${location.pathname}`}
+            className="bg-green-200 text-night-700 transition-colors hover:bg-green-300"
+          >
+            Add income
+          </MyLinkBtn>
+        </div>
       </div>
-      <div className="mt-8 flex flex-row gap-3">
-        <MyLinkBtn
-          to={`expenses/new?redirectTo=${location.pathname}`}
-          className="bg-red-200 text-night-700 transition-colors hover:bg-red-300"
-        >
-          Add expense
-        </MyLinkBtn>
-        <MyLinkBtn
-          to={`income/new?redirectTo=${location.pathname}`}
-          className="bg-green-200 text-night-700 transition-colors hover:bg-green-300"
-        >
-          Add income
-        </MyLinkBtn>
-      </div>
-      <div className="mt-5 flex flex-row items-center gap-3">
+      <div className="mt-5 flex flex-row items-center gap-3 pl-5 lg:pl-20">
         <p className="text-xl font-bold">Filter</p>
-        {categories.map((category) => (
-          <Chip key={category.id}>{category.name}</Chip>
-        ))}
+        <div className="flex w-full flex-row gap-2 overflow-y-auto">
+          {categories.map((category) => (
+            <div key={category.id} className="cursor-pointer">
+              <Chip className="bg-dark-muted-100 hover:bg-dark-muted-200 dark:bg-night-500 dark:hover:bg-night-600">
+                {category.name}
+              </Chip>
+            </div>
+          ))}
+        </div>
       </div>
-      <div className="mt-5">
-        {expensesAndIncome.length <= 0 ? (
-          <>
-            <p className="text-2xl">Nothing to show :(</p>
-            <p className="mt-1 text-xl">
-              Please add an expense or an income to have it displayed here.
-            </p>
-          </>
-        ) : (
-          <div className="flex flex-col flex-wrap gap-8 md:flex-row">
-            {expensesAndIncome.map((individualExpenseOrIncome) => (
-              <Card
-                key={individualExpenseOrIncome.id}
-                expenseOrIncome={individualExpenseOrIncome}
-              />
-            ))}
-          </div>
-        )}
+      <div className="px-5 pb-5 lg:px-20">
+        <div className="mt-5">
+          {expensesAndIncome.length <= 0 ? (
+            <>
+              <p className="text-2xl">Nothing to show :(</p>
+              <p className="mt-1 text-xl">
+                Please add an expense or an income to have it displayed here.
+              </p>
+            </>
+          ) : (
+            <div className="flex flex-col flex-wrap gap-8 md:flex-row">
+              {expensesAndIncome.map((individualExpenseOrIncome) => (
+                <Card
+                  key={individualExpenseOrIncome.id}
+                  expenseOrIncome={individualExpenseOrIncome}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
       <Outlet />
     </>

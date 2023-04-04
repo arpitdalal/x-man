@@ -7,7 +7,7 @@ export default function Chip({
 }) {
   return (
     <div
-      className={`rounded-md px-3 py-1 bg-dark-muted-100 text-sm ${className}`}
+      className={`rounded-md bg-dark-muted-100 px-3 py-1 text-sm ${className}`}
     >
       {children}
     </div>
