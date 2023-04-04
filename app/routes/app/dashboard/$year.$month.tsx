@@ -10,6 +10,7 @@ import Chip from "~/components/Chip";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import {
   authCookie,
+  getAllCategories,
   getAllExpenses,
   getAllIncome,
 } from "~/lib/supabase.server";
@@ -17,7 +18,7 @@ import type { Expense } from "~/types";
 import { useContext } from "react";
 import { DateContext } from "~/utils/client/DateContext";
 import MyLinkBtn from "~/components/MyLinkBtn";
-import { unauthorized } from "remix-utils";
+import { promiseHash, unauthorized } from "remix-utils";
 
 interface ModifiedExpenseAndIncome extends Omit<Expense, "categories"> {
   type: "income" | "expense";
@@ -37,16 +38,22 @@ export async function loader({ params, request }: LoaderArgs) {
   const year = params.year || new Date().getFullYear().toString();
   const month = params.month || (new Date().getMonth() + 1).toString();
 
-  const { expenses } = await getAllExpenses({
-    userId,
-    month,
-    year,
-  });
-
-  const { income } = await getAllIncome({
-    userId,
-    month,
-    year,
+  const {
+    expenses: { expenses },
+    income: { income },
+    categories: { categories },
+  } = await promiseHash({
+    expenses: getAllExpenses({
+      userId,
+      month,
+      year,
+    }),
+    income: getAllIncome({
+      userId,
+      month,
+      year,
+    }),
+    categories: getAllCategories({ userId }),
   });
 
   let data: Array<ModifiedExpenseAndIncome> = [],
@@ -64,6 +71,7 @@ export async function loader({ params, request }: LoaderArgs) {
       totalExpense,
       totalIncome,
       totalTenPer,
+      categories: categories || [],
     });
   }
 
@@ -98,6 +106,7 @@ export async function loader({ params, request }: LoaderArgs) {
       totalExpense,
       totalIncome,
       totalTenPer,
+      categories: categories || [],
     });
   }
 
@@ -123,6 +132,7 @@ export async function loader({ params, request }: LoaderArgs) {
       totalExpense,
       totalIncome,
       totalTenPer,
+      categories: categories || [],
     });
   }
 
@@ -177,6 +187,7 @@ export async function loader({ params, request }: LoaderArgs) {
     totalExpense,
     totalIncome,
     totalTenPer,
+    categories: categories || [],
   });
 }
 
@@ -186,6 +197,7 @@ export default function Month() {
     totalExpense,
     totalIncome,
     totalTenPer,
+    categories,
   } = useLoaderData<typeof loader>();
   const { month, year } = useParams();
   const { month: contextMonth, year: contextYear } = useContext(DateContext);
@@ -250,7 +262,7 @@ export default function Month() {
             </div>
           ) : null}
         </div>
-        <p className="mt-4 text-3xl font-bold border-t border-night-400 pt-4">
+        <p className="mt-4 border-t border-night-400 pt-4 text-3xl font-bold">
           {monthName}'s balance:{" "}
           <span
             className={`${
@@ -260,40 +272,59 @@ export default function Month() {
             {getFormattedCurrency(totalIncome - totalExpense)}
           </span>
         </p>
-        <div className="flex flex-row gap-4 mt-3">
-          <div className="text-xl md:text-2xl text-night-700 bg-green-200 rounded-lg px-4 md:px-10 py-6 text-center">
+        <div className="mt-3 flex flex-row gap-4">
+          <div className="rounded-lg bg-green-200 px-4 py-6 text-center text-xl text-night-700 md:px-10 md:text-2xl">
             <p className="font-bold">Income</p>
             <p className="mt-4">Total: {getFormattedCurrency(totalIncome)}</p>
-            <div className="mt-3 text-base bg-dark-muted-100 rounded-lg text-left py-1 px-3">
-              <p>{getFormattedCurrency(totalTenPer)} is 10%</p>
-            </div>
+            <Chip className="mt-3 text-left text-base">
+              {getFormattedCurrency(totalTenPer)} is 10%
+            </Chip>
           </div>
-          <div className="text-night-700 text-xl md:text-2xl bg-red-200 rounded-lg px-4 md:px-10 py-6 text-center">
+          <div className="rounded-lg bg-red-200 px-4 py-6 text-center text-xl text-night-700 md:px-10 md:text-2xl">
             <p className="font-bold">Expenses</p>
             <p className="mt-4">Total: {getFormattedCurrency(totalExpense)}</p>
           </div>
         </div>
       </div>
-      <div className="mt-8">
-        <MyLinkBtn to={`new?redirectTo=${location.pathname}`}>Add</MyLinkBtn>
+      <div className="mt-8 flex flex-row gap-3">
+        <MyLinkBtn
+          to={`expenses/new?redirectTo=${location.pathname}`}
+          className="bg-red-200 text-night-700 transition-colors hover:bg-red-300"
+        >
+          Add expense
+        </MyLinkBtn>
+        <MyLinkBtn
+          to={`income/new?redirectTo=${location.pathname}`}
+          className="bg-green-200 text-night-700 transition-colors hover:bg-green-300"
+        >
+          Add income
+        </MyLinkBtn>
       </div>
-      {expensesAndIncome.length <= 0 ? (
-        <div className="mt-5">
-          <p className="text-2xl">Nothing to show :(</p>
-          <p className="text-xl mt-1">
-            Please add an expense or an income to have it displayed here.
-          </p>
-        </div>
-      ) : (
-        <div className="flex flex-col md:flex-row flex-wrap gap-8 mt-5">
-          {expensesAndIncome.map((individualExpenseOrIncome) => (
-            <Card
-              key={individualExpenseOrIncome.id}
-              expenseOrIncome={individualExpenseOrIncome}
-            />
-          ))}
-        </div>
-      )}
+      <div className="mt-5 flex flex-row items-center gap-3">
+        <p className="text-xl font-bold">Filter</p>
+        {categories.map((category) => (
+          <Chip key={category.id}>{category.name}</Chip>
+        ))}
+      </div>
+      <div className="mt-5">
+        {expensesAndIncome.length <= 0 ? (
+          <>
+            <p className="text-2xl">Nothing to show :(</p>
+            <p className="mt-1 text-xl">
+              Please add an expense or an income to have it displayed here.
+            </p>
+          </>
+        ) : (
+          <div className="flex flex-col flex-wrap gap-8 md:flex-row">
+            {expensesAndIncome.map((individualExpenseOrIncome) => (
+              <Card
+                key={individualExpenseOrIncome.id}
+                expenseOrIncome={individualExpenseOrIncome}
+              />
+            ))}
+          </div>
+        )}
+      </div>
       <Outlet />
     </>
   );
@@ -309,23 +340,27 @@ function Card({
 
   return (
     <div
-      className={`md:w-80 py-3 px-6 text-night-700 border flex flex-col rounded-lg ${
+      className={`flex flex-col rounded-lg border py-3 px-6 text-night-700 md:w-80 ${
         isIncome ? "bg-green-200" : "bg-red-200"
       }`}
     >
-      <div className="flex flex-row justify-between items-center">
+      <div className="flex flex-row items-center justify-between">
         <p className="text-2xl font-bold">{expenseOrIncome.title}</p>
         <div className="flex flex-row gap-3">
           <MyTooltip title={`Edit ${expenseOrIncome.title}`}>
             <Link
-              to={`${expenseOrIncome.id}/edit?redirectTo=${location.pathname}&isIncome=${isIncome}`}
+              to={`${isIncome ? "income/" : "expenses/"}${
+                expenseOrIncome.id
+              }/edit?redirectTo=${location.pathname}`}
             >
               <EditIcon size="24" />
             </Link>
           </MyTooltip>
           <MyTooltip title={`Delete ${expenseOrIncome.title}`}>
             <Link
-              to={`${expenseOrIncome.id}/delete?redirectTo=${location.pathname}&isIncome=${isIncome}`}
+              to={`${isIncome ? "income/" : "expenses/"}${
+                expenseOrIncome.id
+              }/delete?redirectTo=${location.pathname}`}
             >
               <DeleteIcon size="24" />
             </Link>
@@ -333,7 +368,7 @@ function Card({
         </div>
       </div>
       <div className="flex-1">
-        <div className="flex gap-2 flex-wrap mt-2">
+        <div className="mt-2 flex flex-wrap gap-2">
           {expenseOrIncome.categories
             ? expenseOrIncome.categories.map((category, index) => (
                 <Chip key={`${category}-${index}`}>{category}</Chip>
@@ -341,10 +376,10 @@ function Card({
             : null}
         </div>
       </div>
-      <p className="text-xl mt-4">
+      <p className="mt-4 text-xl">
         {getFormattedCurrency(Number(expenseOrIncome.amount))}
       </p>
-      <p className="text-md text-night-300 italic mt-5">
+      <p className="text-md mt-5 italic text-night-300">
         added {getRelativeTime(expenseOrIncome.created_at || "")}
       </p>
     </div>
@@ -494,7 +529,7 @@ function MyTooltip({
         <Tooltip.Trigger asChild>{children}</Tooltip.Trigger>
         <Tooltip.Portal>
           <Tooltip.Content
-            className="data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade text-violet11 select-none rounded-lg bg-day-100 dark:bg-night-500 px-[15px] py-[10px] text-[15px] leading-none shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] dark:shadow-[hsl(0_0%_0%_/_35%)_0px_10px_38px_-10px,_hsl(0_0%_0%_/_35%)_0px_10px_20px_-15px] will-change-[transform,opacity]"
+            className="data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade text-violet11 select-none rounded-lg bg-day-100 px-[15px] py-[10px] text-[15px] leading-none shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] will-change-[transform,opacity] dark:bg-night-500 dark:shadow-[hsl(0_0%_0%_/_35%)_0px_10px_38px_-10px,_hsl(0_0%_0%_/_35%)_0px_10px_20px_-15px]"
             sideOffset={5}
           >
             {title}

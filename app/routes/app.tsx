@@ -13,7 +13,7 @@ import type { Profile } from "~/types";
 import MyNavLink from "~/components/MyNavLink";
 
 export const meta: MetaFunction = () => {
-  return { title: "Dashboard | X-Man" };
+  return { title: "Dashboard | X Man" };
 };
 
 export type AppLoaderData = {
@@ -92,27 +92,29 @@ export function ErrorBoundary({ error }: { error: Error }) {
 function Header({ profile }: { profile: Profile }) {
   return (
     <header className="pt-3">
-      <div className="max-w-8xl px-5 lg:px-20 mx-auto flex justify-between items-center">
-        <Link to="/" className="text-4xl sm:text-5xl">
-          X-Man
-        </Link>
-        <Form method="post" action="/api/logout">
-          <Button
-            type="submit"
-            className="flex gap-3 justify-between items-center"
-            size="sm"
-          >
-            <img
-              src={profile.avatar_url || ""}
-              alt={profile.name || profile.email}
-              className="h-8 w-8 rounded-full"
-            />
-            <span>Logout</span>
-          </Button>
-        </Form>
+      <div className="px-5 lg:px-20">
+        <div className="max-w-8xl mx-auto flex justify-between items-center">
+          <Link to="/" className="text-4xl sm:text-5xl">
+            X Man
+          </Link>
+          <Form method="post" action="/api/logout">
+            <Button
+              type="submit"
+              className="flex gap-3 justify-between items-center"
+              size="sm"
+            >
+              <img
+                src={profile.avatar_url || ""}
+                alt={profile.name || profile.email}
+                className="h-8 w-8 rounded-full"
+              />
+              <span>Logout</span>
+            </Button>
+          </Form>
+        </div>
       </div>
-      <div className="mt-4 bg-day-200 dark:bg-night-500">
-        <div className="max-w-8xl mx-auto flex px-5 lg:px-20 gap-3">
+      <div className="mt-4 px-5 lg:px-20 bg-day-200 dark:bg-night-500">
+        <div className="max-w-8xl mx-auto flex gap-3">
           <MyNavLink to="dashboard">Dashboard</MyNavLink>
           <MyNavLink to="categories">Categories</MyNavLink>
           <MyNavLink to="presets">Presets</MyNavLink>
@@ -128,7 +130,7 @@ function Footer() {
   return (
     <footer className="py-3 px-5 lg:px-20 border-t border-night-400 dark:border-night-300 border-opacity-20">
       <div className="max-w-8xl mx-auto flex justify-between items-center">
-        <p className="text-2xl font-bold">X-Man</p>
+        <p className="text-2xl font-bold">X Man</p>
         <div>
           <ThemeSwitcher mode={mode} setMode={setMode} />
         </div>

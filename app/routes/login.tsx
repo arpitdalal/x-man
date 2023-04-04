@@ -17,7 +17,7 @@ import authenticated, {
 } from "~/lib/supabase.server";
 
 export function meta() {
-  return { title: "Login | X-Man" };
+  return { title: "Login | X Man" };
 }
 
 export async function loader({ request }: LoaderArgs) {
@@ -109,6 +109,7 @@ export default function Login() {
               type="email"
               name="email"
               defaultValue={actionData?.fields.email}
+              autoComplete="email"
               required
             />
           </div>
@@ -118,6 +119,7 @@ export default function Login() {
               id="password"
               type="password"
               name="password"
+              autoComplete="current-password"
               required
             />
           </div>

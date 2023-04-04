@@ -1,4 +1,5 @@
 import Select from "react-tailwindcss-select";
+import { useState } from "react";
 import type {
   Option,
   SelectValue,
@@ -10,12 +11,17 @@ type MyMultiSelectedProps = {
   categories: Array<Category["name"]>;
   selectedCategories: SelectValue;
   setSelectedCategories: React.Dispatch<React.SetStateAction<SelectValue>>;
+  label: string;
+  required?: boolean;
 };
 export default function MyMultiSelect({
   categories,
   selectedCategories,
   setSelectedCategories,
+  label,
+  required = false,
 }: MyMultiSelectedProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const handleChange = (value: SelectValue) => {
     setSelectedCategories(value);
   };
@@ -31,11 +37,15 @@ export default function MyMultiSelect({
 
   return (
     <>
+      <label onClick={() => setIsMenuOpen(!isMenuOpen)}>
+        {label} {required ? <span className="text-accent-red">*</span> : null}
+      </label>
       <Select
         primaryColor={"purple"}
         value={selectedCategories}
         onChange={handleChange}
         options={categoryOptions}
+        menuIsOpen={isMenuOpen}
         isMultiple
         isSearchable
         isClearable

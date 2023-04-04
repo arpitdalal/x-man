@@ -8,12 +8,9 @@ import { safeRedirect, unauthorized } from "remix-utils";
 import authenticated, {
   authCookie,
   deleteExpense,
-  deleteIncome,
   getExpenseById,
-  getIncomeById,
 } from "~/lib/supabase.server";
 import { Form, useLoaderData } from "@remix-run/react";
-import type { Income } from "~/types";
 import * as Dialog from "@radix-ui/react-dialog";
 import Button from "~/components/Button";
 import MyLinkBtn from "~/components/MyLinkBtn";
@@ -30,36 +27,23 @@ export async function loader({ request, params }: LoaderArgs) {
   if (!userId || typeof userId !== "string") {
     throw unauthorized({
       message: "You must be logged in to access this page",
-      data: null,
+      expense: null,
     });
   }
 
   const id = params.id;
-  const isIncome = new URL(request.url).searchParams.get("isIncome");
 
-  if (!id || isIncome === null) {
+  if (!id) {
     throw redirect(safeRedirect(redirectTo, "/app"));
   }
 
-  if (isIncome === "false") {
-    const { expense, error } = await getExpenseById({ expenseId: id, userId });
-    if (!expense || error) {
-      return json({ message: "Not found.", data: null }, 404);
-    }
-
-    return json({
-      data: JSON.stringify(expense),
-      message: "",
-    });
-  }
-
-  const { income, error } = await getIncomeById({ incomeId: id, userId });
-  if (!income || error) {
-    return json({ message: "Not found.", data: null }, 404);
+  const { expense, error } = await getExpenseById({ expenseId: id, userId });
+  if (!expense || error) {
+    return json({ message: "Not found.", expense: null }, 404);
   }
 
   return json({
-    data: JSON.stringify(income),
+    expense,
     message: "",
   });
 }
@@ -73,18 +57,12 @@ export async function action({ request, params }: ActionArgs) {
       const userId = user.id;
 
       const id = params.id;
-      const isIncome = new URL(request.url).searchParams.get("isIncome");
 
-      if (!id || isIncome === null) {
+      if (!id) {
         throw redirect(safeRedirect(redirectTo, "/app"));
       }
 
-      if (isIncome === "false") {
-        await deleteExpense({ expenseId: id, userId });
-        return redirect(safeRedirect(redirectTo, "/app"));
-      }
-
-      await deleteIncome({ incomeId: id, userId });
+      await deleteExpense({ expenseId: id, userId });
       return redirect(safeRedirect(redirectTo, "/app"));
     },
     () => {
@@ -96,10 +74,10 @@ export async function action({ request, params }: ActionArgs) {
 }
 
 export default function Delete() {
-  const { data } = useLoaderData<typeof loader>();
+  const { expense } = useLoaderData<typeof loader>();
   const redirectTo = useRedirectTo();
 
-  if (!data) {
+  if (!expense) {
     return (
       <ModalMessage
         title="Not found"
@@ -108,24 +86,18 @@ export default function Delete() {
     );
   }
 
-  const expenseOrIncome = JSON.parse(data) as unknown as Income;
-
   return (
-    <Dialog.Root defaultOpen modal>
+    <Dialog.Root open defaultOpen modal>
       <Dialog.Portal>
-        <Dialog.Overlay className="bg-[rgba(0,0,0,0.2)] backdrop-blur data-[state=open]:animate-overlayShow fixed inset-0" />
-        <Dialog.Content className="overflow-auto data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-lg bg-day-100 dark:bg-night-500 p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px]  focus:outline-none dark:shadow-[hsl(0_0%_0%_/_35%)_0px_10px_38px_-10px,_hsl(0_0%_0%_/_35%)_0px_10px_20px_-15px]">
+        <Dialog.Overlay className="data-[state=open]:animate-overlayShow fixed inset-0 bg-[rgba(0,0,0,0.2)] backdrop-blur" />
+        <Dialog.Content className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] overflow-auto rounded-lg bg-day-100 p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none  dark:bg-night-500 dark:shadow-[hsl(0_0%_0%_/_35%)_0px_10px_38px_-10px,_hsl(0_0%_0%_/_35%)_0px_10px_20px_-15px]">
           <Dialog.Title className="m-0 text-[17px] font-medium">
             Are you sure you want to delete{" "}
-            <span className="italic font-bold mr-[2px]">
-              {expenseOrIncome.title}
-            </span>
-            ?
+            <span className="mr-[2px] font-bold italic">{expense.title}</span>?
           </Dialog.Title>
-          <Dialog.Description className="text-night-300 mt-2 text-[15px] leading-normal">
-            To delete{" "}
-            <span className="italic font-bold">{expenseOrIncome.title}</span>,
-            click delete or cancel to go back.
+          <Dialog.Description className="mt-2 text-[15px] leading-normal text-night-300">
+            To delete <span className="font-bold italic">{expense.title}</span>,
+            click delete or cancel to go back
           </Dialog.Description>
           <Form method="post" replace className="mt-5 flex flex-col gap-4">
             <div className="mt-3 flex gap-2">

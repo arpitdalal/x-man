@@ -22,5 +22,8 @@ export function capitalize(string: string) {
 }
 
 export function getStringFromOptions(options: Array<Option>) {
+  if (!options || options.length === 0) {
+    return "";
+  }
   return options.map(option => option.value).join(",")
 }

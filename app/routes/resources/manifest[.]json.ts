@@ -4,8 +4,8 @@ import type { LoaderFunction } from "@remix-run/node";
 export let loader: LoaderFunction = async () => {
   return json(
     {
-      short_name: "PWA",
-      name: "Remix PWA",
+      short_name: "X Man",
+      name: "X Man",
       start_url: "/",
       display: "standalone",
       background_color: "#d3d7dd",

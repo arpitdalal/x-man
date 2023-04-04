@@ -50,7 +50,7 @@ const supabaseOptions: SupabaseClientOptions<"public"> = {
     detectSessionInUrl: false,
   },
   global: {
-    headers: { "x-application-name": "X-Man" },
+    headers: { "x-application-name": "X Man" },
   },
 };
 
@@ -682,6 +682,34 @@ export async function deleteIncome({ incomeId, userId }: DeleteIncomeArgs) {
   }
 }
 
+type GetAllCategoriesArgs = {
+  userId: User["id"];
+};
+export async function getAllCategories({ userId }: GetAllCategoriesArgs) {
+  try {
+    const { data: categories, error } = await supabaseAdmin
+      .from("categories")
+      .select()
+      .in("user_id", ["*", userId]);
+    if (error || !categories) {
+      console.log("getAllCategories", error);
+      return {
+        error: error,
+      };
+    }
+
+    return {
+      categories,
+    };
+  } catch (error) {
+    // TODO: log error nicely
+    console.log("getAllCategories", error);
+    return {
+      error: "Something went wrong",
+    };
+  }
+}
+
 type GetAllExpenseCategoriesArgs = {
   userId: User["id"];
 };
@@ -695,7 +723,7 @@ export async function getAllExpenseCategories({
       .eq("expense", true)
       .in("user_id", ["*", userId]);
     if (error || !categories) {
-      console.log("getAllCategories", error);
+      console.log("getAllExpenseCategories", error);
       return {
         error: error,
       };
@@ -706,7 +734,7 @@ export async function getAllExpenseCategories({
     };
   } catch (error) {
     // TODO: log error nicely
-    console.log("getAllCategories", error);
+    console.log("getAllExpenseCategories", error);
     return {
       error: "Something went wrong",
     };
@@ -726,7 +754,7 @@ export async function getAllIncomeCategories({
       .eq("expense", false)
       .in("user_id", ["*", userId]);
     if (error || !categories) {
-      console.log("getAllCategories", error);
+      console.log("getAllIncomeCategories", error);
       return {
         error: error,
       };
@@ -737,7 +765,7 @@ export async function getAllIncomeCategories({
     };
   } catch (error) {
     // TODO: log error nicely
-    console.log("getAllCategories", error);
+    console.log("getAllIncomeCategories", error);
     return {
       error: "Something went wrong",
     };

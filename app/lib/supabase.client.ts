@@ -22,7 +22,7 @@ const supabaseOptions: SupabaseClientOptions<string> = {
     detectSessionInUrl: true,
   },
   global: {
-    headers: { "x-application-name": "X-Man" },
+    headers: { "x-application-name": "X Man" },
   },
 };
 const customWindow = window as TypedWindow;

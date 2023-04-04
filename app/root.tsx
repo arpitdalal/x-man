@@ -15,7 +15,7 @@ import { ThemeContext } from "~/utils/client/ThemeContext";
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
-  title: "Home | X-Man",
+  title: "Home | X Man",
   viewport: "width=device-width,initial-scale=1",
   "color-scheme": "dark light",
 });

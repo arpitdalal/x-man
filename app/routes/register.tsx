@@ -11,7 +11,7 @@ import TextInput from "~/components/TextInput";
 import authenticated, { registerUser } from "~/lib/supabase.server";
 
 export function meta() {
-  return { title: "Register | X-Man" };
+  return { title: "Register | X Man" };
 }
 
 export function loader({ request }: LoaderArgs) {
@@ -89,6 +89,7 @@ export default function Register() {
               type="email"
               name="email"
               defaultValue={actionData?.fields.email}
+              autoComplete="email"
               required
             />
           </div>
@@ -99,6 +100,7 @@ export default function Register() {
               type="password"
               name="password"
               minLength={10}
+              autoComplete="new-password"
               required
             />
           </div>
