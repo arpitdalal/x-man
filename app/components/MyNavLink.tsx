@@ -1,19 +1,24 @@
 import { NavLink, type NavLinkProps } from "@remix-run/react";
+import { twMerge } from "tailwind-merge";
 
 export default function MyNavLink({
   children,
   className,
+  stringClassName = "",
   ...rest
-}: NavLinkProps) {
+}: { stringClassName?: string } & NavLinkProps) {
   return (
     <NavLink
       {...rest}
       className={({ isActive }) =>
-        `transition-colors rounded-sm py-2 px-5 hover:bg-accent-purple dark:hover:bg-accent-purple ${
-          isActive
-            ? "bg-accent-purple text-day-100"
-            : "bg-day-300 dark:bg-night-400 text-night-700 dark:text-day-100 hover:text-day-100"
-        } ${className}`
+        twMerge(
+          `rounded-sm py-2 px-5 transition-colors hover:bg-accent-purple dark:hover:bg-accent-purple ${
+            isActive
+              ? "bg-accent-purple text-day-100"
+              : "bg-day-300 text-night-700 hover:text-day-100 dark:bg-night-400 dark:text-day-100"
+          }`,
+          stringClassName
+        )
       }
     >
       {children}

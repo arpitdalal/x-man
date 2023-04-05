@@ -3,6 +3,7 @@ import {
   type LoaderArgs,
   redirect,
   type ActionArgs,
+  type MetaFunction,
 } from "@remix-run/node";
 import { safeRedirect, unauthorized } from "remix-utils";
 import authenticated, {
@@ -16,7 +17,22 @@ import Button from "~/components/Button";
 import MyLinkBtn from "~/components/MyLinkBtn";
 import useRedirectTo from "~/hooks/useRedirectTo";
 import ModalMessage from "~/components/ModalMessage";
+import type { Income } from "~/types";
 
+export const meta: MetaFunction = ({ data }) => {
+  if (!data?.income)
+    return {
+      title: "Not found | X Man",
+    };
+  return {
+    title: `Delete ${(data as unknown as LoaderData).income.title} | X Man`,
+  };
+};
+
+type LoaderData = {
+  message: string;
+  income: Income;
+};
 export async function loader({ request, params }: LoaderArgs) {
   const redirectTo = new URL(request.url).searchParams.get("redirectTo");
 

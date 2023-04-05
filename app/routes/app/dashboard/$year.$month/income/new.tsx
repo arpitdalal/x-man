@@ -7,6 +7,7 @@ import {
   type LoaderArgs,
   json,
   redirect,
+  type MetaFunction,
 } from "@remix-run/node";
 import authenticated, {
   authCookie,
@@ -22,6 +23,12 @@ import MyLinkBtn from "~/components/MyLinkBtn";
 import MyMultiSelect from "~/components/MyMultiSelect";
 import type { SelectValue } from "react-tailwindcss-select/dist/components/type";
 import { sanitizeAmount } from "~/utils/server";
+
+export const meta: MetaFunction = () => {
+  return {
+    title: "Add income | X Man",
+  };
+};
 
 export async function loader({ request }: LoaderArgs) {
   const authSession = await authCookie.getSession(

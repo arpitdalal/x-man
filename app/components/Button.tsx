@@ -1,3 +1,5 @@
+import { twMerge } from "tailwind-merge";
+
 export const SolidBtnSmClassName =
   "transition-colors py-2 px-6 bg-accent-purple text-day-100 rounded-lg hover:bg-accent-dark-purple disabled:bg-opacity-30 disabled:hover:bg-accent-purple disabled:hover:bg-opacity-30";
 export const SolidBtnMdClassName =
@@ -44,7 +46,7 @@ export default function Button({
   }
 
   return (
-    <button className={`${customClassName} ${className}`} {...rest}>
+    <button className={twMerge(customClassName, className)} {...rest}>
       {children}
     </button>
   );

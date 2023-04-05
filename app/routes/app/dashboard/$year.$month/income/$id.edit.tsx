@@ -3,6 +3,7 @@ import {
   type LoaderArgs,
   json,
   redirect,
+  type MetaFunction,
 } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import { promiseHash, safeRedirect, unauthorized } from "remix-utils";
@@ -27,6 +28,16 @@ import type {
 } from "react-tailwindcss-select/dist/components/type";
 import { useState } from "react";
 import ModalMessage from "~/components/ModalMessage";
+
+export const meta: MetaFunction = ({ data }) => {
+  if (!data?.income)
+    return {
+      title: "Not found | X Man",
+    };
+  return {
+    title: `Edit ${(data as unknown as LoaderData).income.title} | X Man`,
+  };
+};
 
 type LoaderData = {
   message: string;
@@ -182,7 +193,7 @@ export default function Edit() {
     return (
       <ModalMessage
         title="Not found"
-        message="We couldn't find an expense or an income. Please head back to the month view"
+        message="We couldn't find an income. Please head back to the dashboard."
       />
     );
   }

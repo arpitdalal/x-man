@@ -1,10 +1,12 @@
-import { json, type LoaderArgs } from "@remix-run/node";
+import { type ActionArgs, json, type LoaderArgs } from "@remix-run/node";
 import {
+  Form,
   Link,
   Outlet,
   useLoaderData,
   useLocation,
   useParams,
+  useSubmit,
 } from "@remix-run/react";
 import Chip from "~/components/Chip";
 import * as Tooltip from "@radix-ui/react-tooltip";
@@ -13,12 +15,14 @@ import {
   getAllCategories,
   getAllExpenses,
   getAllIncome,
+  getFilteredExpenses,
 } from "~/lib/supabase.server";
 import type { Expense } from "~/types";
-import { useContext } from "react";
+import { useContext, useRef } from "react";
 import { DateContext } from "~/utils/client/DateContext";
 import MyLinkBtn from "~/components/MyLinkBtn";
 import { promiseHash, unauthorized } from "remix-utils";
+import FilterChip from "~/components/FilterChip";
 
 interface ModifiedExpenseAndIncome extends Omit<Expense, "categories"> {
   type: "income" | "expense";
@@ -37,6 +41,8 @@ export async function loader({ params, request }: LoaderArgs) {
   }
   const year = params.year || new Date().getFullYear().toString();
   const month = params.month || (new Date().getMonth() + 1).toString();
+  const url = new URL(request.url);
+  const tags = url.searchParams.getAll("tags") ?? [];
 
   const {
     expenses: { expenses },
@@ -47,11 +53,13 @@ export async function loader({ params, request }: LoaderArgs) {
       userId,
       month,
       year,
+      tags,
     }),
     income: getAllIncome({
       userId,
       month,
       year,
+      tags,
     }),
     categories: getAllCategories({ userId }),
   });
@@ -191,6 +199,52 @@ export async function loader({ params, request }: LoaderArgs) {
   });
 }
 
+export async function action({ request, params }: ActionArgs) {
+  const authSession = await authCookie.getSession(
+    request.headers.get("Cookie")
+  );
+  const userId = authSession.get("user_id");
+  if (!userId || typeof userId !== "string") {
+    throw unauthorized({
+      message: "You must be logged in to access this page",
+    });
+  }
+
+  const year = params.year || new Date().getFullYear().toString();
+  const month = params.month || (new Date().getMonth() + 1).toString();
+  const form = await request.formData();
+  const filterTags = form.get("filterTags");
+
+  if (!filterTags || typeof filterTags !== "string") {
+    return json(
+      {
+        formError: `Form not submitted correctly.`,
+      },
+      403
+    );
+  }
+
+  const { error, expenses } = await getFilteredExpenses({
+    userId,
+    categories: filterTags,
+    year,
+    month,
+  });
+
+  if (error) {
+    return json(
+      {
+        formError: `Something went wrong.`,
+      },
+      500
+    );
+  }
+
+  return json({
+    expenses,
+  });
+}
+
 export default function Month() {
   const {
     data: expensesAndIncome,
@@ -202,6 +256,8 @@ export default function Month() {
   const { month, year } = useParams();
   const { month: contextMonth, year: contextYear } = useContext(DateContext);
   const location = useLocation();
+  const submitFilters = useSubmit();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const goNextLink = () => {
     let nextMonth = Number(month) + 1;
@@ -230,6 +286,12 @@ export default function Month() {
 
   const monthName = getMonthName(month || "0");
   const isBalanceNegative = totalIncome - totalExpense < 0;
+
+  function handleFilterChange() {
+    if (formRef) {
+      submitFilters(formRef.current, { replace: true });
+    }
+  }
 
   return (
     <>
@@ -290,29 +352,42 @@ export default function Month() {
         </div>
         <div className="mt-8 flex flex-row gap-3">
           <MyLinkBtn
-            to={`expenses/new?redirectTo=${location.pathname}`}
-            className="bg-red-200 text-night-700 transition-colors hover:bg-red-300"
-          >
-            Add expense
-          </MyLinkBtn>
-          <MyLinkBtn
             to={`income/new?redirectTo=${location.pathname}`}
             className="bg-green-200 text-night-700 transition-colors hover:bg-green-300"
           >
             Add income
           </MyLinkBtn>
+          <MyLinkBtn
+            to={`expenses/new?redirectTo=${location.pathname}`}
+            className="bg-red-200 text-night-700 transition-colors hover:bg-red-300"
+          >
+            Add expense
+          </MyLinkBtn>
         </div>
       </div>
-      <div className="mt-5 flex flex-row items-center gap-3 pl-5 lg:pl-20">
-        <p className="text-xl font-bold">Filter</p>
-        <div className="flex w-full flex-row gap-2 overflow-y-auto">
-          {categories.map((category) => (
-            <div key={category.id} className="cursor-pointer">
-              <Chip className="bg-dark-muted-100 hover:bg-dark-muted-200 dark:bg-night-500 dark:hover:bg-night-600">
+      <div className="mt-5 flex flex-col gap-2 pl-5 lg:pl-20">
+        <p className="text-xl font-bold">Filter tags</p>
+        <div onChange={handleFilterChange}>
+          <Form
+            method="get"
+            className="flex w-full flex-row gap-2 overflow-y-auto"
+            ref={formRef}
+          >
+            {categories.map((category) => (
+              <FilterChip
+                key={category.id}
+                className={(checked) => {
+                  return checked
+                    ? "cursor-pointer bg-accent-purple"
+                    : "cursor-pointer bg-dark-muted-100 checked:bg-accent-purple hover:bg-dark-muted-200 dark:bg-night-500 dark:hover:bg-night-600";
+                }}
+                name="tags"
+                value={category.name}
+              >
                 {category.name}
-              </Chip>
-            </div>
-          ))}
+              </FilterChip>
+            ))}
+          </Form>
         </div>
       </div>
       <div className="px-5 pb-5 lg:px-20">

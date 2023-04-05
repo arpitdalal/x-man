@@ -121,7 +121,7 @@ export async function refreshUserToken(session: Session) {
     });
 
     if (error || !data || !data.session || !data.user) {
-      return { error: error?.message || "Something went wrong" };
+      return { error: error?.message };
     }
 
     return {
@@ -140,7 +140,7 @@ export async function loginUser({ email, password }: AuthForm) {
       await supabaseAdmin.auth.signInWithPassword({ email, password });
 
     if (loginError || !data || !data.session || !data.user) {
-      return { error: loginError?.message || "Something went wrong" };
+      return { error: loginError?.message };
     }
 
     return {
@@ -161,7 +161,7 @@ export async function registerUser({ email, password }: AuthForm) {
     });
 
     if (signUpError || !data || !data.user) {
-      return { error: signUpError?.message || "Something went wrong" };
+      return { error: signUpError?.message };
     }
 
     return { user: data.user };
@@ -176,7 +176,7 @@ export async function signOutUser(session: Session) {
   try {
     const { error } = await supabaseAdmin.auth.signOut();
     if (error) {
-      return { done: false, error: error?.message || "Something went wrong" };
+      return { done: false, error: error.message };
     }
     return { done: true };
   } catch {
@@ -192,7 +192,7 @@ export async function getUserByAccessToken(accessToken: string) {
     const { data, error } = await supabaseAdmin.auth.getUser(accessToken);
 
     if (error || !data.user) {
-      return { error: error?.message || "Something went wrong" };
+      return { error: error?.message };
     }
 
     return { user: data.user };
@@ -219,7 +219,7 @@ export async function sendResetPasswordEmailForUser({
     );
 
     if (error || data === null) {
-      return { error: error?.message || "Something went wrong" };
+      return { error: error.message };
     }
     return {};
   } catch (error) {
@@ -242,7 +242,7 @@ export async function resetPasswordForUser({
     );
 
     if (userError || !user) {
-      return { error: userError || "Something went wrong" };
+      return { error: userError };
     }
 
     const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
@@ -253,7 +253,7 @@ export async function resetPasswordForUser({
     );
 
     if (error || !data) {
-      return { error: error?.message || "Something went wrong" };
+      return { error: error?.message };
     }
 
     return { user: data.user };
@@ -328,7 +328,7 @@ export async function getProfileById(userId: User["id"]) {
     if (error || !profile) {
       console.log("getProfileById", error);
       return {
-        error: error,
+        error: error.message,
       };
     }
 
@@ -346,14 +346,16 @@ type ExpenseOrIncomeArgs = {
   month: string;
   year: string;
   userId: User["id"];
+  tags?: string[];
 };
 export async function getAllExpenses({
   userId,
   month,
   year,
+  tags = [],
 }: ExpenseOrIncomeArgs) {
   try {
-    const { data: expenses, error } = await supabaseAdmin
+    let { data: expenses, error } = await supabaseAdmin
       .from("expenses")
       .select(`*`)
       .eq("user_id", userId)
@@ -363,8 +365,14 @@ export async function getAllExpenses({
     if (error || !expenses) {
       console.log("getAllExpenses", error);
       return {
-        error: error,
+        error: error?.message || "Something went wrong",
       };
+    }
+
+    if (tags.length > 0) {
+      expenses = expenses.filter((expense) =>
+        tags.includes(expense.categories || "") ? expense : null
+      );
     }
 
     return { expenses };
@@ -381,9 +389,10 @@ export async function getAllIncome({
   userId,
   month,
   year,
+  tags = [],
 }: ExpenseOrIncomeArgs) {
   try {
-    const { data: income, error } = await supabaseAdmin
+    let { data: income, error } = await supabaseAdmin
       .from("income")
       .select()
       .eq("user_id", userId)
@@ -393,8 +402,16 @@ export async function getAllIncome({
     if (error || !income) {
       console.log("getAllIncome", error);
       return {
-        error: error,
+        error: error?.message || "Something went wrong",
       };
+    }
+
+    if (tags.length > 0) {
+      income = income.filter((individualIncome) =>
+        tags.includes(individualIncome.categories || "")
+          ? individualIncome
+          : null
+      );
     }
 
     return { income };
@@ -431,7 +448,7 @@ export async function insertExpense({
     if (error || !newExpense) {
       console.log("insertExpense", error);
       return {
-        error: error,
+        error: error.message,
       };
     }
 
@@ -464,7 +481,7 @@ export async function getExpenseById({
     if (error || !expense) {
       console.log("getExpenseById", error);
       return {
-        error: error,
+        error: error.message,
       };
     }
 
@@ -502,7 +519,7 @@ export async function updateExpense({
     if (error || !expense) {
       console.log("updateExpense", error);
       return {
-        error: error,
+        error: error.message,
       };
     }
 
@@ -569,7 +586,7 @@ export async function insertIncome({
     if (error || !newIncome) {
       console.log("insertIncome", error);
       return {
-        error: error,
+        error: error.message,
       };
     }
 
@@ -599,7 +616,7 @@ export async function getIncomeById({ incomeId, userId }: GetIncomeByIdArgs) {
     if (error || !income) {
       console.log("getIncomeById", error);
       return {
-        error: error,
+        error: error.message,
       };
     }
 
@@ -639,7 +656,7 @@ export async function updateIncome({
     if (error || !income) {
       console.log("updateIncome", error);
       return {
-        error: error,
+        error: error.message,
       };
     }
 
@@ -694,7 +711,7 @@ export async function getAllCategories({ userId }: GetAllCategoriesArgs) {
     if (error || !categories) {
       console.log("getAllCategories", error);
       return {
-        error: error,
+        error: error.message,
       };
     }
 
@@ -725,7 +742,7 @@ export async function getAllExpenseCategories({
     if (error || !categories) {
       console.log("getAllExpenseCategories", error);
       return {
-        error: error,
+        error: error.message,
       };
     }
 
@@ -756,7 +773,7 @@ export async function getAllIncomeCategories({
     if (error || !categories) {
       console.log("getAllIncomeCategories", error);
       return {
-        error: error,
+        error,
       };
     }
 
@@ -802,3 +819,40 @@ export async function getAllDefaultCategories({
     };
   }
 }
+
+type GetFilteredExpensesArgs = {
+  categories: string;
+} & ExpenseOrIncomeArgs;
+export const getFilteredExpenses = async ({
+  userId,
+  month,
+  year,
+  categories,
+}: GetFilteredExpensesArgs) => {
+  try {
+    const { expenses, error } = await getAllExpenses({ userId, month, year });
+    if (error) {
+      console.log("getFilteredExpenses", error);
+      return {
+        error,
+      };
+    }
+    if (!expenses) {
+      return {
+        expenses,
+      };
+    }
+
+    const filteredExpenses = expenses.filter((expense) =>
+      categories.includes(expense.categories || "")
+    );
+
+    return { expenses: filteredExpenses };
+  } catch (error) {
+    // TODO: log error nicely
+    console.log("getFilteredExpenses", error);
+    return {
+      error: "Something went wrong",
+    };
+  }
+};

@@ -3,6 +3,7 @@ import {
   type LoaderArgs,
   redirect,
   type ActionArgs,
+  type MetaFunction,
 } from "@remix-run/node";
 import { safeRedirect, unauthorized } from "remix-utils";
 import authenticated, {
@@ -16,7 +17,22 @@ import Button from "~/components/Button";
 import MyLinkBtn from "~/components/MyLinkBtn";
 import useRedirectTo from "~/hooks/useRedirectTo";
 import ModalMessage from "~/components/ModalMessage";
+import type { Expense } from "~/types";
 
+export const meta: MetaFunction = ({ data }) => {
+  if (!data?.expense)
+    return {
+      title: "Not found | X Man",
+    };
+  return {
+    title: `Delete ${(data as unknown as LoaderData).expense.title} | X Man`,
+  };
+};
+
+type LoaderData = {
+  message: string;
+  expense: Expense;
+};
 export async function loader({ request, params }: LoaderArgs) {
   const redirectTo = new URL(request.url).searchParams.get("redirectTo");
 
@@ -81,7 +97,7 @@ export default function Delete() {
     return (
       <ModalMessage
         title="Not found"
-        message="We couldn't find an expense or an income. Please head back to the month view"
+        message="We couldn't find an expense. Please head back to the dashboard."
       />
     );
   }

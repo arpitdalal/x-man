@@ -1,4 +1,5 @@
 import { Link, type LinkProps } from "@remix-run/react";
+import { twMerge } from "tailwind-merge";
 import {
   OutlineBtnLgClassName,
   OutlineBtnMdClassName,
@@ -34,7 +35,7 @@ export default function MyLinkBtn({
   }
 
   return (
-    <Link {...rest} className={`${customClassName} ${className}`}>
+    <Link {...rest} className={twMerge(customClassName, className)}>
       {children}
     </Link>
   );
