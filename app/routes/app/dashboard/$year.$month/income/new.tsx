@@ -1,4 +1,10 @@
-import * as Dialog from "@radix-ui/react-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "~/components/Dialog";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import TextInput from "~/components/TextInput";
 import useRedirectTo from "~/hooks/useRedirectTo";
@@ -151,64 +157,61 @@ export default function New() {
     }) || [];
 
   return (
-    <Dialog.Root open defaultOpen modal>
-      <Dialog.Portal>
-        <Dialog.Overlay className="data-[state=open]:animate-overlayShow fixed inset-0 bg-[rgba(0,0,0,0.2)] backdrop-blur" />
-        <Dialog.Content className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] overflow-auto rounded-lg bg-day-100 p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none  dark:bg-night-500 dark:shadow-[hsl(0_0%_0%_/_35%)_0px_10px_38px_-10px,_hsl(0_0%_0%_/_35%)_0px_10px_20px_-15px]">
-          <Dialog.Title className="m-0 text-[17px] font-medium">
-            Add Income
-          </Dialog.Title>
-          <Form method="post" replace className="mt-5 flex flex-col gap-4">
-            <input type="hidden" name="redirectTo" value={redirectTo} />
-            <input type="hidden" name="date" value={date} />
-            <div className="flex flex-col gap-2">
-              <TextInput
-                label="Title"
-                id="title"
-                type="text"
-                name="title"
-                defaultValue={actionData?.fields?.title || ""}
-                placeholder="Salary"
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <TextInput
-                label="Amount"
-                id="amount"
-                type="text"
-                name="amount"
-                inputMode="decimal"
-                pattern="[0-9.]*"
-                defaultValue={actionData?.fields?.title || ""}
-                placeholder="1000.00"
-                required
-              />
-            </div>
-            <div className="flex flex-row items-center gap-2">
-              <label htmlFor="addInTenPer">
-                Add this income in 10% counting
-              </label>
-              <Switch.Root
-                className="relative h-[25px] w-[42px] cursor-default rounded-full bg-blackA9 shadow-[0_2px_10px] shadow-blackA7 outline-none focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-accent-purple"
-                id="addInTenPer"
-                name="addInTenPer"
-                defaultChecked={
-                  actionData?.fields?.addInTenPer !== undefined
-                    ? actionData?.fields?.addInTenPer
-                    : true
-                }
-              >
-                <Switch.Thumb className="block h-[21px] w-[21px] translate-x-0.5 rounded-full bg-white shadow-[0_2px_2px] shadow-blackA7 transition-transform duration-100 will-change-transform data-[state=checked]:translate-x-[19px]" />
-              </Switch.Root>
-            </div>
-            <MyMultiSelect
-              categories={incomeCategoryNames}
-              selectedCategories={selectedCategories}
-              setSelectedCategories={setSelectedCategories}
-              label="Categories"
+    <Dialog open modal>
+      <DialogContent className="sm:max-w-[450px]">
+        <DialogHeader>
+          <DialogTitle>Add Income</DialogTitle>
+        </DialogHeader>
+        <Form method="post" replace className="flex flex-col gap-4">
+          <input type="hidden" name="redirectTo" value={redirectTo} />
+          <input type="hidden" name="date" value={date} />
+          <div className="flex flex-col gap-2">
+            <TextInput
+              label="Title"
+              id="title"
+              type="text"
+              name="title"
+              defaultValue={actionData?.fields?.title || ""}
+              placeholder="Salary"
               required
             />
+          </div>
+          <div className="flex flex-col gap-2">
+            <TextInput
+              label="Amount"
+              id="amount"
+              type="text"
+              name="amount"
+              inputMode="decimal"
+              pattern="[0-9.]*"
+              defaultValue={actionData?.fields?.title || ""}
+              placeholder="1000.00"
+              required
+            />
+          </div>
+          <div className="flex flex-row items-center gap-2">
+            <label htmlFor="addInTenPer">Add this income in 10% counting</label>
+            <Switch.Root
+              className="relative h-[25px] w-[42px] cursor-default rounded-full bg-blackA9 shadow-[0_2px_10px] shadow-blackA7 outline-none focus:shadow-[0_0_0_2px] focus:shadow-black radix-state-checked:bg-accent-purple"
+              id="addInTenPer"
+              name="addInTenPer"
+              defaultChecked={
+                actionData?.fields?.addInTenPer !== undefined
+                  ? actionData?.fields?.addInTenPer
+                  : true
+              }
+            >
+              <Switch.Thumb className="block h-[21px] w-[21px] translate-x-0.5 rounded-full bg-white shadow-[0_2px_2px] shadow-blackA7 transition-transform will-change-transform duration-100 radix-state-checked:translate-x-[19px]" />
+            </Switch.Root>
+          </div>
+          <MyMultiSelect
+            categories={incomeCategoryNames}
+            selectedCategories={selectedCategories}
+            setSelectedCategories={setSelectedCategories}
+            label="Categories"
+            required
+          />
+          <DialogFooter>
             <div className="mt-3 flex gap-2">
               <Button type="submit">Add</Button>
               <MyLinkBtn
@@ -220,9 +223,9 @@ export default function New() {
                 Cancel
               </MyLinkBtn>
             </div>
-          </Form>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+          </DialogFooter>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -11,6 +11,7 @@ import {
 import { safeRedirect } from "remix-utils";
 import type { Expense, Income } from "~/types";
 import type { Database } from "~/types/supabase";
+import { IN_TEN_PERCENT_CATEGORY } from "~/utils/client";
 
 declare global {
   namespace NodeJS {
@@ -312,7 +313,7 @@ export default async function authenticated(
 
     return await successFunction(user);
   } catch (error) {
-    console.log(error); // You should log this error to your logging system
+    console.log(error);
     return failureFunction();
   }
 }
@@ -342,6 +343,10 @@ export async function getProfileById(userId: User["id"]) {
   }
 }
 
+/**
+ * Expenses API
+ */
+
 type ExpenseOrIncomeArgs = {
   month: string;
   year: string;
@@ -355,69 +360,52 @@ export async function getAllExpenses({
   tags = [],
 }: ExpenseOrIncomeArgs) {
   try {
-    let { data: expenses, error } = await supabaseAdmin
+    const { data: expenses, error } = await supabaseAdmin
       .from("expenses")
       .select(`*`)
+      .order("created_at", { ascending: false })
       .eq("user_id", userId)
       .eq("month", month)
       .eq("year", year);
+
+    const { expenseCategories } = await getAllExpenseCategories({ userId });
 
     if (error || !expenses) {
       console.log("getAllExpenses", error);
       return {
-        error: error?.message || "Something went wrong",
+        error: error.message,
       };
     }
 
-    if (tags.length > 0) {
-      expenses = expenses.filter((expense) =>
-        tags.includes(expense.categories || "") ? expense : null
-      );
+    let areTagsIncludedInCategories = false;
+    (expenseCategories || []).forEach((expenseCategory) => {
+      if (tags.includes(expenseCategory.name) && !areTagsIncludedInCategories) {
+        areTagsIncludedInCategories = true;
+      }
+    });
+
+    if (tags.length > 0 && areTagsIncludedInCategories) {
+      let filteredExpenses = [] as Array<Expense>;
+      expenses.forEach((individualExpense) => {
+        const categories = individualExpense.categories
+          ? individualExpense.categories.split(",")
+          : [];
+        let added = false;
+        tags.forEach((tag) => {
+          if (categories.includes(tag) && !added) {
+            filteredExpenses.push(individualExpense);
+            added = true;
+          }
+        });
+      });
+
+      return { expenses, filteredExpenses };
     }
 
-    return { expenses };
+    return { expenses, filteredExpenses: [] };
   } catch (error) {
     // TODO: log error nicely
     console.log("getAllExpenses ", error);
-    return {
-      error: "Something went wrong",
-    };
-  }
-}
-
-export async function getAllIncome({
-  userId,
-  month,
-  year,
-  tags = [],
-}: ExpenseOrIncomeArgs) {
-  try {
-    let { data: income, error } = await supabaseAdmin
-      .from("income")
-      .select()
-      .eq("user_id", userId)
-      .eq("month", month)
-      .eq("year", year);
-
-    if (error || !income) {
-      console.log("getAllIncome", error);
-      return {
-        error: error?.message || "Something went wrong",
-      };
-    }
-
-    if (tags.length > 0) {
-      income = income.filter((individualIncome) =>
-        tags.includes(individualIncome.categories || "")
-          ? individualIncome
-          : null
-      );
-    }
-
-    return { income };
-  } catch (error) {
-    // TODO: log error nicely
-    console.log("getAllIncome", error);
     return {
       error: "Something went wrong",
     };
@@ -562,6 +550,111 @@ export async function deleteExpense({ expenseId, userId }: DeleteExpenseArgs) {
   }
 }
 
+/**
+ * Income API
+ */
+export async function getAllIncome({
+  userId,
+  month,
+  year,
+  tags = [],
+}: ExpenseOrIncomeArgs) {
+  try {
+    const { data: income, error } = await supabaseAdmin
+      .from("income")
+      .select()
+      .order("created_at", { ascending: false })
+      .eq("user_id", userId)
+      .eq("month", month)
+      .eq("year", year);
+    const { incomeCategories } = await getAllIncomeCategories({ userId });
+
+    if (error || !income) {
+      console.log("getAllIncome", error);
+      return {
+        error: error.message,
+      };
+    }
+
+    let areTagsIncludedInCategories = false;
+
+    (incomeCategories || []).forEach((incomeCategory) => {
+      if (
+        tags.includes(IN_TEN_PERCENT_CATEGORY.name) &&
+        !areTagsIncludedInCategories
+      ) {
+        areTagsIncludedInCategories = true;
+      } else if (
+        tags.includes(incomeCategory.name) &&
+        !areTagsIncludedInCategories
+      ) {
+        areTagsIncludedInCategories = true;
+      }
+    });
+
+    if (tags.length > 0 && areTagsIncludedInCategories) {
+      let filteredIncome = [] as Array<Income>;
+      if (tags.includes(IN_TEN_PERCENT_CATEGORY.name) && tags.length === 1) {
+        income.forEach((individualIncome) => {
+          let added = false;
+          if (individualIncome.addInTenPer && !added) {
+            filteredIncome.push(individualIncome);
+            added = true;
+          }
+        });
+      } else if (
+        tags.includes(IN_TEN_PERCENT_CATEGORY.name) &&
+        tags.length > 1
+      ) {
+        let incomeWithTenPer = [] as Array<Income>;
+        income.forEach((individualIncome) => {
+          if (individualIncome.addInTenPer) {
+            incomeWithTenPer.push(individualIncome);
+          }
+        });
+        incomeWithTenPer.forEach((individualIncome) => {
+          const categories = individualIncome.categories
+            ? individualIncome.categories.split(",")
+            : [];
+          let added = false;
+          tags.forEach((tag) => {
+            if (categories.includes(tag) && !added) {
+              filteredIncome.push(individualIncome);
+              added = true;
+            }
+          });
+        });
+      } else {
+        income.forEach((individualIncome) => {
+          const categories = individualIncome.categories
+            ? individualIncome.categories.split(",")
+            : [];
+          let added = false;
+          tags.forEach((tag) => {
+            if (categories.includes(tag) && !added) {
+              filteredIncome.push(individualIncome);
+              added = true;
+            }
+          });
+        });
+      }
+
+      return { income, filteredIncome };
+    }
+
+    return {
+      income,
+      filteredIncome: [],
+    };
+  } catch (error) {
+    // TODO: log error nicely
+    console.log("getAllIncome", error);
+    return {
+      error: "Something went wrong",
+    };
+  }
+}
+
 type InsertIncomeArgs = Pick<
   Income,
   "title" | "amount" | "day" | "month" | "year" | "categories" | "addInTenPer"
@@ -699,6 +792,9 @@ export async function deleteIncome({ incomeId, userId }: DeleteIncomeArgs) {
   }
 }
 
+/**
+ * Categories API
+ */
 type GetAllCategoriesArgs = {
   userId: User["id"];
 };
@@ -819,40 +915,3 @@ export async function getAllDefaultCategories({
     };
   }
 }
-
-type GetFilteredExpensesArgs = {
-  categories: string;
-} & ExpenseOrIncomeArgs;
-export const getFilteredExpenses = async ({
-  userId,
-  month,
-  year,
-  categories,
-}: GetFilteredExpensesArgs) => {
-  try {
-    const { expenses, error } = await getAllExpenses({ userId, month, year });
-    if (error) {
-      console.log("getFilteredExpenses", error);
-      return {
-        error,
-      };
-    }
-    if (!expenses) {
-      return {
-        expenses,
-      };
-    }
-
-    const filteredExpenses = expenses.filter((expense) =>
-      categories.includes(expense.categories || "")
-    );
-
-    return { expenses: filteredExpenses };
-  } catch (error) {
-    // TODO: log error nicely
-    console.log("getFilteredExpenses", error);
-    return {
-      error: "Something went wrong",
-    };
-  }
-};

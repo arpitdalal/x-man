@@ -1,4 +1,4 @@
-import { type ActionArgs, json, type LoaderArgs } from "@remix-run/node";
+import { json, type LoaderArgs } from "@remix-run/node";
 import {
   Form,
   Link,
@@ -15,15 +15,14 @@ import {
   getAllCategories,
   getAllExpenses,
   getAllIncome,
-  getFilteredExpenses,
 } from "~/lib/supabase.server";
-import type { Expense } from "~/types";
+import type { Category, Expense } from "~/types";
 import { useContext, useRef } from "react";
 import { DateContext } from "~/utils/client/DateContext";
 import MyLinkBtn from "~/components/MyLinkBtn";
 import { promiseHash, unauthorized } from "remix-utils";
 import FilterChip from "~/components/FilterChip";
-
+import { IN_TEN_PERCENT_CATEGORY } from "~/utils/client";
 interface ModifiedExpenseAndIncome extends Omit<Expense, "categories"> {
   type: "income" | "expense";
   categories: Array<string>;
@@ -45,8 +44,8 @@ export async function loader({ params, request }: LoaderArgs) {
   const tags = url.searchParams.getAll("tags") ?? [];
 
   const {
-    expenses: { expenses },
-    income: { income },
+    expenses: { expenses, filteredExpenses },
+    income: { income, filteredIncome },
     categories: { categories },
   } = await promiseHash({
     expenses: getAllExpenses({
@@ -64,7 +63,26 @@ export async function loader({ params, request }: LoaderArgs) {
     categories: getAllCategories({ userId }),
   });
 
+  let sortedCategories: Array<Category> = categories
+    ? [IN_TEN_PERCENT_CATEGORY, ...categories]
+    : [IN_TEN_PERCENT_CATEGORY];
+
+  if (categories && tags.length > 0) {
+    const selectedCategories = categories.filter((category) =>
+      tags.includes(category.name)
+    );
+    const restCategories = categories.filter(
+      (category) => !tags.includes(category.name)
+    );
+    sortedCategories = [
+      ...selectedCategories,
+      IN_TEN_PERCENT_CATEGORY,
+      ...restCategories,
+    ];
+  }
+
   let data: Array<ModifiedExpenseAndIncome> = [],
+    filteredData: Array<ModifiedExpenseAndIncome> = [],
     totalExpense = 0,
     totalIncome = 0,
     totalTenPer = 0;
@@ -76,10 +94,12 @@ export async function loader({ params, request }: LoaderArgs) {
   ) {
     return json({
       data,
+      filteredData,
       totalExpense,
       totalIncome,
       totalTenPer,
-      categories: categories || [],
+      categories: sortedCategories,
+      tags,
     });
   }
 
@@ -108,13 +128,29 @@ export async function loader({ params, request }: LoaderArgs) {
       });
       data = modifiedIncome;
     }
+    if (filteredIncome && filteredIncome.length > 0) {
+      const modifiedFilteredIncome = filteredIncome.map(
+        (individualFilteredIncome) => {
+          const categories =
+            individualFilteredIncome?.categories?.split(",") || [];
+          return {
+            ...individualFilteredIncome,
+            type: "income" as const,
+            categories,
+          };
+        }
+      );
+      filteredData = modifiedFilteredIncome;
+    }
 
     return json({
       data,
+      filteredData,
       totalExpense,
       totalIncome,
       totalTenPer,
-      categories: categories || [],
+      categories: sortedCategories,
+      tags,
     });
   }
 
@@ -134,13 +170,29 @@ export async function loader({ params, request }: LoaderArgs) {
       });
       data = modifiedExpenses;
     }
+    if (filteredExpenses && filteredExpenses.length > 0) {
+      const modifiedFilteredExpense = filteredExpenses.map(
+        (individualFilteredExpense) => {
+          const categories =
+            individualFilteredExpense.categories?.split(",") || [];
+          return {
+            ...individualFilteredExpense,
+            type: "expense" as const,
+            categories,
+          };
+        }
+      );
+      filteredData = modifiedFilteredExpense;
+    }
 
     return json({
       data,
+      filteredData,
       totalExpense,
       totalIncome,
       totalTenPer,
-      categories: categories || [],
+      categories: sortedCategories,
+      tags,
     });
   }
 
@@ -171,12 +223,10 @@ export async function loader({ params, request }: LoaderArgs) {
     const categories = individualExpense.categories?.split(",") || [];
     return { ...individualExpense, type: "expense" as const, categories };
   });
-
   const modifiedIncome = income.map((individualIncome) => {
     const categories = individualIncome.categories?.split(",") || [];
     return { ...individualIncome, type: "income" as const, categories };
   });
-
   const expensesAndIncome = [...modifiedExpenses, ...modifiedIncome];
   const sortedExpensesAndIncome = expensesAndIncome.sort((a, b) => {
     const dateA = new Date(a.created_at!).getTime();
@@ -190,69 +240,66 @@ export async function loader({ params, request }: LoaderArgs) {
     return 0;
   });
 
+  const modifiedFilteredExpenses = filteredExpenses!.map(
+    (individualFilteredExpense) => {
+      const categories = individualFilteredExpense.categories?.split(",") || [];
+      return {
+        ...individualFilteredExpense,
+        type: "expense" as const,
+        categories,
+      };
+    }
+  );
+  const modifiedFilteredIncome = filteredIncome!.map(
+    (individualFilteredIncome) => {
+      const categories = individualFilteredIncome.categories?.split(",") || [];
+      return {
+        ...individualFilteredIncome,
+        type: "income" as const,
+        categories,
+      };
+    }
+  );
+  const filteredExpensesAndIncome = [
+    ...modifiedFilteredExpenses,
+    ...modifiedFilteredIncome,
+  ];
+  const sortedFilteredExpensesAndIncome = filteredExpensesAndIncome.sort(
+    (a, b) => {
+      const dateA = new Date(a.created_at!).getTime();
+      const dateB = new Date(b.created_at!).getTime();
+      if (dateA < dateB) {
+        return 1;
+      }
+      if (dateA > dateB) {
+        return -1;
+      }
+      return 0;
+    }
+  );
+
   return json({
     data: sortedExpensesAndIncome,
+    filteredData: sortedFilteredExpensesAndIncome,
     totalExpense,
     totalIncome,
     totalTenPer,
-    categories: categories || [],
-  });
-}
-
-export async function action({ request, params }: ActionArgs) {
-  const authSession = await authCookie.getSession(
-    request.headers.get("Cookie")
-  );
-  const userId = authSession.get("user_id");
-  if (!userId || typeof userId !== "string") {
-    throw unauthorized({
-      message: "You must be logged in to access this page",
-    });
-  }
-
-  const year = params.year || new Date().getFullYear().toString();
-  const month = params.month || (new Date().getMonth() + 1).toString();
-  const form = await request.formData();
-  const filterTags = form.get("filterTags");
-
-  if (!filterTags || typeof filterTags !== "string") {
-    return json(
-      {
-        formError: `Form not submitted correctly.`,
-      },
-      403
-    );
-  }
-
-  const { error, expenses } = await getFilteredExpenses({
-    userId,
-    categories: filterTags,
-    year,
-    month,
-  });
-
-  if (error) {
-    return json(
-      {
-        formError: `Something went wrong.`,
-      },
-      500
-    );
-  }
-
-  return json({
-    expenses,
+    categories: sortedCategories,
+    tags,
   });
 }
 
 export default function Month() {
   const {
-    data: expensesAndIncome,
+    data,
+    filteredData,
     totalExpense,
     totalIncome,
     totalTenPer,
     categories,
+    tags,
   } = useLoaderData<typeof loader>();
+  const expensesAndIncome = filteredData.length > 0 ? filteredData : data;
   const { month, year } = useParams();
   const { month: contextMonth, year: contextYear } = useContext(DateContext);
   const location = useLocation();
@@ -383,6 +430,7 @@ export default function Month() {
                 }}
                 name="tags"
                 value={category.name}
+                selected={tags.includes(category.name)}
               >
                 {category.name}
               </FilterChip>

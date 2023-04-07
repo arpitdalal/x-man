@@ -12,6 +12,8 @@ import {
 import { useEffect, useState } from "react";
 import styles from "./tailwind.css";
 import { ThemeContext } from "~/utils/client/ThemeContext";
+import nProgressCss from "./nprogress.css";
+import { useLoadingEffect } from "~/hooks/useLoadingEffect";
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
@@ -20,7 +22,10 @@ export const meta: MetaFunction = () => ({
   "color-scheme": "dark light",
 });
 
-export const links: LinksFunction = () => [{ rel: "stylesheet", href: styles }];
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: styles },
+  { rel: "stylesheet", href: nProgressCss },
+];
 
 export type Mode = "system" | "light" | "dark";
 export type ThemeContextType = [
@@ -51,6 +56,7 @@ export default function App() {
     );
   }, []);
   useSWEffect();
+  useLoadingEffect();
 
   return (
     <html lang="en" className={`${theme}`}>
@@ -59,19 +65,20 @@ export default function App() {
         <link rel="manifest" href="/resources/manifest.json" />
         <Links />
       </head>
-      <body className="dark:bg-night-700 dark:text-day-200 bg-day-100 text-night-700">
+      <body className="bg-day-100 text-night-700 dark:bg-night-700 dark:text-day-200">
         <main>
           <ThemeContext.Provider value={{ mode, setMode }}>
             <Outlet />
           </ThemeContext.Provider>
         </main>
-        <ScrollRestoration />
+        <ScrollRestoration getKey={(location) => location.pathname} />
         <script
           dangerouslySetInnerHTML={{
             __html: `window.ENV = ${JSON.stringify(loaderData.ENV)}`,
           }}
         />
-        <Scripts /> <LiveReload />
+        <Scripts />
+        <LiveReload />
       </body>
     </html>
   );

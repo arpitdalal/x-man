@@ -11,8 +11,14 @@ import authenticated, {
   deleteExpense,
   getExpenseById,
 } from "~/lib/supabase.server";
-import { Form, useLoaderData } from "@remix-run/react";
-import * as Dialog from "@radix-ui/react-dialog";
+import { Form, useLoaderData } from "@remix-run/react";import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "~/components/Dialog";
 import Button from "~/components/Button";
 import MyLinkBtn from "~/components/MyLinkBtn";
 import useRedirectTo from "~/hooks/useRedirectTo";
@@ -103,34 +109,35 @@ export default function Delete() {
   }
 
   return (
-    <Dialog.Root open defaultOpen modal>
-      <Dialog.Portal>
-        <Dialog.Overlay className="data-[state=open]:animate-overlayShow fixed inset-0 bg-[rgba(0,0,0,0.2)] backdrop-blur" />
-        <Dialog.Content className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] overflow-auto rounded-lg bg-day-100 p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none  dark:bg-night-500 dark:shadow-[hsl(0_0%_0%_/_35%)_0px_10px_38px_-10px,_hsl(0_0%_0%_/_35%)_0px_10px_20px_-15px]">
-          <Dialog.Title className="m-0 text-[17px] font-medium">
+    <Dialog open modal>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+          <DialogTitle>
             Are you sure you want to delete{" "}
             <span className="mr-[2px] font-bold italic">{expense.title}</span>?
-          </Dialog.Title>
-          <Dialog.Description className="mt-2 text-[15px] leading-normal text-night-300">
+          </DialogTitle>
+          </DialogHeader>
+          <DialogDescription>
             To delete <span className="font-bold italic">{expense.title}</span>,
             click delete or cancel to go back
-          </Dialog.Description>
-          <Form method="post" replace className="mt-5 flex flex-col gap-4">
-            <div className="mt-3 flex gap-2">
-              <Button type="submit" className="bg-red-600 hover:bg-red-900">
-                delete
-              </Button>
-              <MyLinkBtn
-                btnType="outline"
-                to={redirectTo || "/app"}
-                type="submit"
-              >
-                Cancel
-              </MyLinkBtn>
-            </div>
+          </DialogDescription>
+          <Form method="post" replace className="flex flex-col gap-4">
+            <DialogFooter>
+              <div className="mt-3 flex gap-2">
+                <Button type="submit" className="bg-red-600 hover:bg-red-900">
+                  delete
+                </Button>
+                <MyLinkBtn
+                  btnType="outline"
+                  to={redirectTo || "/app"}
+                  type="submit"
+                >
+                  Cancel
+                </MyLinkBtn>
+              </div>
+            </DialogFooter>
           </Form>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        </DialogContent>
+    </Dialog>
   );
 }
