@@ -1,11 +1,11 @@
 import { Link, type LinkProps } from "@remix-run/react";
-import { twMerge } from "tailwind-merge";
+import { cn } from "~/utils/client";
 
 export default function MyLink({ children, className, ...rest }: LinkProps) {
   return (
     <Link
       {...rest}
-      className={twMerge(
+      className={cn(
         "underline transition-colors hover:text-accent-purple",
         className
       )}

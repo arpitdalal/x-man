@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { twMerge } from "tailwind-merge";
 import { ChipsClassName } from "~/components/Chip";
+import { cn } from "~/utils/client";
 
 type FilterChipProps = {
   name: string;
@@ -20,7 +20,7 @@ export default function FilterChip({
 
   return (
     <>
-      <label className={twMerge(ChipsClassName, className(checked))}>
+      <label className={cn(ChipsClassName, className(checked))}>
         {children}
         <input
           type="checkbox"

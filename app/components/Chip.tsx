@@ -1,4 +1,4 @@
-import { twMerge } from "tailwind-merge";
+import { cn } from "~/utils/client";
 
 export const ChipsClassName = "rounded-md bg-dark-muted-100 px-3 py-1 text-sm";
 type ChipProps = {
@@ -6,7 +6,7 @@ type ChipProps = {
 } & React.HTMLAttributes<HTMLDivElement>;
 export default function Chip({ children, className, ...rest }: ChipProps) {
   return (
-    <div className={twMerge(ChipsClassName, className)} {...rest}>
+    <div className={cn(ChipsClassName, className)} {...rest}>
       {children}
     </div>
   );

@@ -14,6 +14,7 @@ import styles from "./tailwind.css";
 import { ThemeContext } from "~/utils/client/ThemeContext";
 import nProgressCss from "./nprogress.css";
 import { useLoadingEffect } from "~/hooks/useLoadingEffect";
+import { cn } from "~/utils/client";
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
@@ -59,7 +60,7 @@ export default function App() {
   useLoadingEffect();
 
   return (
-    <html lang="en" className={`${theme}`}>
+    <html lang="en" className={cn("overscroll-none", theme)}>
       <head>
         <Meta />
         <link rel="manifest" href="/resources/manifest.json" />
