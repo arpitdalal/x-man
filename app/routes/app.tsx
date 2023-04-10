@@ -1,5 +1,12 @@
 import { json, type LoaderArgs, type MetaFunction } from "@remix-run/node";
-import { Form, Link, Outlet, useCatch, useLoaderData } from "@remix-run/react";
+import {
+  Form,
+  Link,
+  Outlet,
+  useCatch,
+  useLoaderData,
+  useLocation,
+} from "@remix-run/react";
 import { useContext, useState } from "react";
 import { unauthorized } from "remix-utils";
 import Button from "~/components/Button";
@@ -38,9 +45,10 @@ export async function loader({ request }: LoaderArgs) {
 
 export default function App() {
   const { profile } = useLoaderData<AppLoaderData>();
+  const location = useLocation();
 
   if (!profile) {
-    return <LoginMessage />;
+    return <LoginMessage redirectUrl={location.pathname} />;
   }
 
   return (
@@ -56,17 +64,20 @@ export default function App() {
 
 export function CatchBoundary() {
   const caught = useCatch();
+  const location = useLocation();
 
   if (caught.status === 401) {
-    return <LoginMessage />;
+    return <LoginMessage redirectUrl={location.pathname} />;
   }
 
   throw new Error(`Unexpected caught response with status: ${caught.status}`);
 }
 
 export function ErrorBoundary({ error }: { error: Error }) {
+  const location = useLocation();
+
   if (error.message === "Profile not found") {
-    return <LoginMessage />;
+    return <LoginMessage redirectUrl={location.pathname} />;
   }
 
   console.error("Error message: ", error.message); // TODO: Log this nicely

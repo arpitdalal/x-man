@@ -6,6 +6,7 @@ import {
   useLoaderData,
   useLocation,
   useParams,
+  useSearchParams,
   useSubmit,
 } from "@remix-run/react";
 import Chip from "~/components/Chip";
@@ -299,10 +300,11 @@ export default function Month() {
     categories,
     tags,
   } = useLoaderData<typeof loader>();
-  const expensesAndIncome = filteredData.length > 0 ? filteredData : data;
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const expensesAndIncome = searchParams.get("tags") ? filteredData : data;
   const { month, year } = useParams();
   const { month: contextMonth, year: contextYear } = useContext(DateContext);
-  const location = useLocation();
   const submitFilters = useSubmit();
   const formRef = useRef<HTMLFormElement>(null);
 

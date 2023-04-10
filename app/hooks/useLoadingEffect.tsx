@@ -46,7 +46,6 @@ export const useLoadingEffect = () => {
           (transitionState !== "idle" || someFetcherIsSubmitting) &&
           !globalIsLoading
         ) {
-          console.log("HERE");
           setGlobalIsLoading(true);
         }
       }, 10);
