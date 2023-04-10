@@ -435,7 +435,7 @@ export default function Month() {
         <div onChange={handleFilterChange}>
           <Form
             method="get"
-            className="flex w-full flex-row items-center gap-2 overflow-y-auto"
+            className="custom-scrollbar flex w-full flex-row items-center gap-2 overflow-y-auto pb-1"
             ref={formRef}
           >
             {categories.map((category) => (

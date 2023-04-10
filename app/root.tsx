@@ -66,7 +66,7 @@ export default function App() {
         <link rel="manifest" href="/resources/manifest.json" />
         <Links />
       </head>
-      <body className="overscroll-none bg-day-100 text-night-700 dark:bg-night-700 dark:text-day-200">
+      <body className="custom-scrollbar overscroll-none bg-day-100 text-night-700 dark:bg-night-700 dark:text-day-200">
         <main>
           <ThemeContext.Provider value={{ mode, setMode }}>
             <Outlet />

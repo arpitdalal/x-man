@@ -51,7 +51,7 @@ module.exports = {
         ...blackA,
       },
       fontFamily: {
-        sans: ["Nunito Sans", ...defaultTheme.fontFamily.sans],
+        sans: ['"Source Sans Pro"', ...defaultTheme.fontFamily.sans],
       },
       maxWidth: {
         "8xl": "1440px",
@@ -62,5 +62,9 @@ module.exports = {
     require("@tailwindcss/forms"),
     require("tailwindcss-radix")(),
     require("tailwindcss-animate"),
+    require("tailwind-scrollbar")({ nocompatible: true }),
   ],
+  variants: {
+    scrollbar: ["rounded", "dark"],
+  },
 };
