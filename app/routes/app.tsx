@@ -53,9 +53,7 @@ export default function App() {
 
   return (
     <div className="flex h-screen flex-col">
-      <div>
-        <Header profile={profile} />
-      </div>
+      <Header profile={profile} />
       <div className="flex-1">
         <Outlet />
       </div>
@@ -100,32 +98,34 @@ export function ErrorBoundary({ error }: { error: Error }) {
 
 function Header({ profile }: { profile: Profile }) {
   return (
-    <header className="bg-day-100 pt-3 dark:bg-night-700">
-      <div className="flex items-center justify-between px-5 lg:px-20">
-        <Link to="/" className="text-4xl sm:text-5xl">
-          X Man
-        </Link>
-        <Form method="post" action="/api/logout">
-          <Button
-            type="submit"
-            className="flex items-center justify-between gap-3"
-            size="sm"
-          >
-            <img
-              src={profile.avatar_url || ""}
-              alt={profile.name || profile.email}
-              className="h-8 w-8 rounded-full"
-            />
-            <span>Logout</span>
-          </Button>
-        </Form>
-      </div>
-      <div className="mt-4 flex gap-3 bg-day-200 px-5 dark:bg-night-500 lg:px-20">
+    <>
+      <header className="bg-day-100 pt-3 dark:bg-night-700">
+        <div className="flex items-center justify-between px-5 lg:px-20">
+          <Link to="/" className="text-4xl sm:text-5xl">
+            X Man
+          </Link>
+          <Form method="post" action="/api/logout">
+            <Button
+              type="submit"
+              className="flex items-center justify-between gap-3"
+              size="sm"
+            >
+              <img
+                src={profile.avatar_url || ""}
+                alt={profile.name || profile.email}
+                className="h-8 w-8 rounded-full"
+              />
+              <span>Logout</span>
+            </Button>
+          </Form>
+        </div>
+      </header>
+      <div className="sticky top-0 mt-4 flex gap-3 bg-day-200 px-5 dark:bg-night-500 lg:px-20">
         <MyNavLink to="dashboard">Dashboard</MyNavLink>
         <MyNavLink to="categories">Categories</MyNavLink>
         <MyNavLink to="presets">Presets</MyNavLink>
       </div>
-    </header>
+    </>
   );
 }
 

@@ -350,7 +350,7 @@ export default function Month() {
 
   return (
     <>
-      <div className="bg-day-100 dark:bg-night-700">
+      <div className="sticky top-[40px] bg-day-100 dark:bg-night-700">
         <div className="px-5 pt-5 lg:px-20">
           <div className="flex items-center gap-4">
             <div className="flex">
@@ -418,13 +418,13 @@ export default function Month() {
         <div className="mt-8 flex flex-row gap-3">
           <MyLinkBtn
             to={`income/new?redirectTo=${location.pathname}`}
-            className="flex-1 bg-green-200 text-night-700 transition-colors hover:bg-green-300 md:flex-none"
+            className="flex-1 bg-green-200 text-center text-night-700 transition-colors hover:bg-green-300 md:flex-none"
           >
             Add income
           </MyLinkBtn>
           <MyLinkBtn
             to={`expenses/new?redirectTo=${location.pathname}`}
-            className="flex-1 bg-red-200 text-night-700 transition-colors hover:bg-red-300 md:flex-none"
+            className="flex-1 bg-red-200 text-center text-night-700 transition-colors hover:bg-red-300 md:flex-none"
           >
             Add expense
           </MyLinkBtn>
