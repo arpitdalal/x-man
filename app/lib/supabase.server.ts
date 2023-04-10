@@ -11,7 +11,7 @@ import {
 import { safeRedirect } from "remix-utils";
 import type { Expense, Income } from "~/types";
 import type { Database } from "~/types/supabase";
-import { IN_TEN_PERCENT_CATEGORY } from "~/utils/client";
+import { SEVA_CATEGORY } from "~/utils/client";
 
 declare global {
   namespace NodeJS {
@@ -579,10 +579,7 @@ export async function getAllIncome({
     let areTagsIncludedInCategories = false;
 
     (incomeCategories || []).forEach((incomeCategory) => {
-      if (
-        tags.includes(IN_TEN_PERCENT_CATEGORY.name) &&
-        !areTagsIncludedInCategories
-      ) {
+      if (tags.includes(SEVA_CATEGORY.name) && !areTagsIncludedInCategories) {
         areTagsIncludedInCategories = true;
       } else if (
         tags.includes(incomeCategory.name) &&
@@ -594,21 +591,18 @@ export async function getAllIncome({
 
     if (tags.length > 0 && areTagsIncludedInCategories) {
       let filteredIncome = [] as Array<Income>;
-      if (tags.includes(IN_TEN_PERCENT_CATEGORY.name) && tags.length === 1) {
+      if (tags.includes(SEVA_CATEGORY.name) && tags.length === 1) {
         income.forEach((individualIncome) => {
           let added = false;
-          if (individualIncome.addInTenPer && !added) {
+          if (individualIncome.seva && !added) {
             filteredIncome.push(individualIncome);
             added = true;
           }
         });
-      } else if (
-        tags.includes(IN_TEN_PERCENT_CATEGORY.name) &&
-        tags.length > 1
-      ) {
+      } else if (tags.includes(SEVA_CATEGORY.name) && tags.length > 1) {
         let incomeWithTenPer = [] as Array<Income>;
         income.forEach((individualIncome) => {
-          if (individualIncome.addInTenPer) {
+          if (individualIncome.seva) {
             incomeWithTenPer.push(individualIncome);
           }
         });
@@ -657,7 +651,7 @@ export async function getAllIncome({
 
 type InsertIncomeArgs = Pick<
   Income,
-  "title" | "amount" | "day" | "month" | "year" | "categories" | "addInTenPer"
+  "title" | "amount" | "day" | "month" | "year" | "categories" | "seva"
 >;
 export async function insertIncome({
   income,
@@ -726,9 +720,7 @@ export async function getIncomeById({ incomeId, userId }: GetIncomeByIdArgs) {
 type UpdateIncomeArgs = {
   incomeId: Income["id"];
   userId: User["id"];
-  query: Partial<
-    Pick<Income, "title" | "amount" | "categories" | "addInTenPer">
-  >;
+  query: Partial<Pick<Income, "title" | "amount" | "categories" | "seva">>;
 };
 export async function updateIncome({
   incomeId,

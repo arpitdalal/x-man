@@ -10,7 +10,6 @@ import {
   useSubmit,
 } from "@remix-run/react";
 import Chip from "~/components/Chip";
-import * as Tooltip from "@radix-ui/react-tooltip";
 import {
   authCookie,
   getAllCategories,
@@ -23,7 +22,16 @@ import { DateContext } from "~/utils/client/DateContext";
 import MyLinkBtn from "~/components/MyLinkBtn";
 import { promiseHash, unauthorized } from "remix-utils";
 import FilterChip from "~/components/FilterChip";
-import { IN_TEN_PERCENT_CATEGORY } from "~/utils/client";
+import { SEVA_CATEGORY } from "~/utils/client";
+import MyTooltip from "~/components/MyTooltip";
+import {
+  ChevronRightIcon,
+  ChevronLeftIcon,
+  CalendarDaysIcon,
+  EditIcon,
+  Trash2Icon,
+} from "lucide-react";
+
 interface ModifiedExpenseAndIncome extends Omit<Expense, "categories"> {
   type: "income" | "expense";
   categories: Array<string>;
@@ -65,8 +73,8 @@ export async function loader({ params, request }: LoaderArgs) {
   });
 
   let sortedCategories: Array<Category> = categories
-    ? [IN_TEN_PERCENT_CATEGORY, ...categories]
-    : [IN_TEN_PERCENT_CATEGORY];
+    ? [SEVA_CATEGORY, ...categories]
+    : [SEVA_CATEGORY];
 
   if (categories && tags.length > 0) {
     const selectedCategories = categories.filter((category) =>
@@ -77,7 +85,7 @@ export async function loader({ params, request }: LoaderArgs) {
     );
     sortedCategories = [
       ...selectedCategories,
-      IN_TEN_PERCENT_CATEGORY,
+      SEVA_CATEGORY,
       ...restCategories,
     ];
   }
@@ -114,10 +122,10 @@ export async function loader({ params, request }: LoaderArgs) {
         (prevIncome, currIncome) => Number(prevIncome) + Number(currIncome),
         0
       );
-      const incomeWithTenPer = income.filter(
-        (individualIncome) => individualIncome.addInTenPer
+      const sevaIncome = income.filter(
+        (individualIncome) => individualIncome.seva
       );
-      const totalIncomeWithTenPer = incomeWithTenPer.reduce(
+      const totalIncomeWithTenPer = sevaIncome.reduce(
         (prevIncome, currIncome) =>
           Number(prevIncome) + Number(currIncome.amount),
         0
@@ -203,9 +211,7 @@ export async function loader({ params, request }: LoaderArgs) {
   const incomeAmounts = income.map(
     (individualIncome) => individualIncome.amount
   );
-  const incomeWithTenPer = income.filter(
-    (individualIncome) => individualIncome.addInTenPer
-  );
+  const sevaIncome = income.filter((individualIncome) => individualIncome.seva);
   totalExpense = expenseAmounts.reduce(
     (prevExpense, currExpense) => Number(prevExpense) + Number(currExpense),
     0
@@ -214,7 +220,7 @@ export async function loader({ params, request }: LoaderArgs) {
     (prevIncome, currIncome) => Number(prevIncome) + Number(currIncome),
     0
   );
-  const totalIncomeWithTenPer = incomeWithTenPer.reduce(
+  const totalIncomeWithTenPer = sevaIncome.reduce(
     (prevIncome, currIncome) => Number(prevIncome) + Number(currIncome.amount),
     0
   );
@@ -344,37 +350,47 @@ export default function Month() {
 
   return (
     <>
-      <div className="px-5 pt-5 lg:px-20">
-        <div className="flex items-center gap-4">
-          <div className="flex">
-            <MyTooltip title="Previous month">
-              <Link to={goPrevLink()} aria-label="Previous month">
-                <ChevronLeftIcon size="36" />
-              </Link>
-            </MyTooltip>
-            <MyTooltip title="Next month">
-              <Link
-                to={goNextLink()}
-                aria-label="Next month"
-                title="Next month"
-              >
-                <ChevronRightIcon size="36" />
-              </Link>
-            </MyTooltip>
-          </div>
-          <p className="text-3xl">{monthName}</p>
-          {!isCurrentYearMonth ? (
-            <div className="ml-3">
-              <MyTooltip title="Jump to current month">
-                <Link to={`/app/dashboard/${contextYear}/${contextMonth}`}>
-                  <ReplyIcon size="36" />
-                </Link>
+      <div className="bg-day-100 dark:bg-night-700">
+        <div className="px-5 pt-5 lg:px-20">
+          <div className="flex items-center gap-4">
+            <div className="flex">
+              <MyTooltip title="Previous month">
+                <button type="button">
+                  <Link to={goPrevLink()} aria-label="Go to previous month">
+                    <ChevronLeftIcon size="36" />
+                  </Link>
+                  <span className="sr-only">Go to previous month</span>
+                </button>
+              </MyTooltip>
+              <MyTooltip title="Next month">
+                <button type="button">
+                  <Link to={goNextLink()} aria-label="Go to next month">
+                    <ChevronRightIcon size="36" />
+                  </Link>
+                  <span className="sr-only">Go to next month</span>
+                </button>
               </MyTooltip>
             </div>
-          ) : null}
+            <p className="text-3xl">{monthName}</p>
+            {!isCurrentYearMonth ? (
+              <div className="ml-3 flex items-center">
+                <MyTooltip title="Jump to current month">
+                  <button type="button">
+                    <Link
+                      to={`/app/dashboard/${contextYear}/${contextMonth}`}
+                      aria-label="Jump to current month"
+                    >
+                      <CalendarDaysIcon size="28" />
+                    </Link>
+                    <span className="sr-only">Jump to current month</span>
+                  </button>
+                </MyTooltip>
+              </div>
+            ) : null}
+          </div>
         </div>
+        <div className="mt-4 border-t border-night-400 border-opacity-20 dark:border-night-300"></div>
       </div>
-      <div className="mt-4 border-t border-night-400 border-opacity-20 dark:border-night-300"></div>
       <div className="px-5 pt-4 lg:px-20">
         <p className="text-3xl font-bold">
           {monthName}'s balance:{" "}
@@ -387,14 +403,14 @@ export default function Month() {
           </span>
         </p>
         <div className="mt-3 flex flex-row gap-4">
-          <div className="rounded-lg bg-green-200 px-4 py-6 text-center text-xl text-night-700 md:px-10 md:text-2xl">
+          <div className="flex-1 rounded-lg bg-green-200 px-4 py-6 text-center text-xl text-night-700 md:flex-none md:px-10 md:text-2xl">
             <p className="font-bold">Income</p>
             <p className="mt-4">Total: {getFormattedCurrency(totalIncome)}</p>
             <Chip className="mt-3 text-left text-base">
               {getFormattedCurrency(totalTenPer)} is 10%
             </Chip>
           </div>
-          <div className="rounded-lg bg-red-200 px-4 py-6 text-center text-xl text-night-700 md:px-10 md:text-2xl">
+          <div className="flex-1 rounded-lg bg-red-200 px-4 py-6 text-center text-xl text-night-700 md:flex-none md:px-10 md:text-2xl">
             <p className="font-bold">Expenses</p>
             <p className="mt-4">Total: {getFormattedCurrency(totalExpense)}</p>
           </div>
@@ -402,13 +418,13 @@ export default function Month() {
         <div className="mt-8 flex flex-row gap-3">
           <MyLinkBtn
             to={`income/new?redirectTo=${location.pathname}`}
-            className="bg-green-200 text-night-700 transition-colors hover:bg-green-300"
+            className="flex-1 bg-green-200 text-night-700 transition-colors hover:bg-green-300 md:flex-none"
           >
             Add income
           </MyLinkBtn>
           <MyLinkBtn
             to={`expenses/new?redirectTo=${location.pathname}`}
-            className="bg-red-200 text-night-700 transition-colors hover:bg-red-300"
+            className="flex-1 bg-red-200 text-night-700 transition-colors hover:bg-red-300 md:flex-none"
           >
             Add expense
           </MyLinkBtn>
@@ -419,7 +435,7 @@ export default function Month() {
         <div onChange={handleFilterChange}>
           <Form
             method="get"
-            className="flex w-full flex-row gap-2 overflow-y-auto"
+            className="flex w-full flex-row items-center gap-2 overflow-y-auto"
             ref={formRef}
           >
             {categories.map((category) => (
@@ -484,22 +500,30 @@ function Card({
         <p className="text-2xl font-bold">{expenseOrIncome.title}</p>
         <div className="flex flex-row gap-3">
           <MyTooltip title={`Edit ${expenseOrIncome.title}`}>
-            <Link
-              to={`${isIncome ? "income/" : "expenses/"}${
-                expenseOrIncome.id
-              }/edit?redirectTo=${location.pathname}`}
-            >
-              <EditIcon size="24" />
-            </Link>
+            <button type="button">
+              <Link
+                to={`${isIncome ? "income/" : "expenses/"}${
+                  expenseOrIncome.id
+                }/edit?redirectTo=${location.pathname}`}
+                aria-label={`Edit ${expenseOrIncome.title}`}
+              >
+                <EditIcon size="24" />
+              </Link>
+              <span className="sr-only">{`Edit ${expenseOrIncome.title}`}</span>
+            </button>
           </MyTooltip>
           <MyTooltip title={`Delete ${expenseOrIncome.title}`}>
-            <Link
-              to={`${isIncome ? "income/" : "expenses/"}${
-                expenseOrIncome.id
-              }/delete?redirectTo=${location.pathname}`}
-            >
-              <DeleteIcon size="24" />
-            </Link>
+            <button type="button">
+              <Link
+                to={`${isIncome ? "income/" : "expenses/"}${
+                  expenseOrIncome.id
+                }/delete?redirectTo=${location.pathname}`}
+                aria-label={`Delete ${expenseOrIncome.title}`}
+              >
+                <Trash2Icon size="24" className="text-red-600" />
+              </Link>
+              <span className="sr-only">{`Delete ${expenseOrIncome.title}`}</span>
+            </button>
           </MyTooltip>
         </div>
       </div>
@@ -519,161 +543,6 @@ function Card({
         added {getRelativeTime(expenseOrIncome.created_at || "")}
       </p>
     </div>
-  );
-}
-
-function ChevronLeftIcon({ size }: { size: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={`${size}px`}
-      height={`${size}px`}
-      viewBox="0 0 24 24"
-    >
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        d="m14 7l-5 5l5 5"
-      />
-    </svg>
-  );
-}
-
-function ChevronRightIcon({ size }: { size: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={`${size}px`}
-      height={`${size}px`}
-      viewBox="0 0 24 24"
-    >
-      <path
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        d="m10 7l5 5l-5 5"
-      />
-    </svg>
-  );
-}
-
-function ReplyIcon({ size }: { size: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={`${size}px`}
-      height={`${size}px`}
-      viewBox="0 0 24 24"
-    >
-      <path
-        fill="currentColor"
-        d="M10 9V5l-7 7l7 7v-4.1c5 0 8.5 1.6 11 5.1c-1-5-4-10-11-11Z"
-      />
-    </svg>
-  );
-}
-
-function EditIcon({ size }: { size: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={`${size}px`}
-      height={`${size}px`}
-      viewBox="0 0 24 24"
-      fill="none"
-    >
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M7 4C5.34315 4 4 5.34315 4 7V17C4 18.6569 5.34315 20 7 20H17C18.6569 20 20 18.6569 20 17V11C20 10.4477 20.4477 10 21 10C21.5523 10 22 10.4477 22 11V17C22 19.7614 19.7614 22 17 22H7C4.23858 22 2 19.7614 2 17V7C2 4.23858 4.23858 2 7 2H13C13.5523 2 14 2.44772 14 3C14 3.55228 13.5523 4 13 4H7Z"
-        fill="currentColor"
-      />
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M17.2156 2.82088C17.7412 2.29528 18.4541 2 19.1974 2C19.9407 2 20.6535 2.29528 21.1791 2.82088C21.7047 3.34648 22 4.05934 22 4.80265C22 5.54596 21.7047 6.25883 21.1791 6.78443L20.396 7.56757C20.0055 7.9581 19.3723 7.9581 18.9818 7.56757L16.4324 5.01824C16.0419 4.62771 16.0419 3.99455 16.4324 3.60402L17.2156 2.82088ZM15.0182 6.43245C14.6277 6.04192 13.9945 6.04192 13.604 6.43245L9.14269 10.8938C9.01453 11.0219 8.92362 11.1825 8.87966 11.3583L8.02988 14.7575C7.94468 15.0982 8.04453 15.4587 8.29291 15.7071C8.54129 15.9555 8.90178 16.0553 9.24256 15.9701L12.6417 15.1204C12.8175 15.0764 12.9781 14.9855 13.1062 14.8573L17.5676 10.396C17.9581 10.0055 17.9581 9.37231 17.5676 8.98179L15.0182 6.43245Z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
-
-function DeleteIcon({ size }: { size: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={`${size}px`}
-      height={`${size}px`}
-      viewBox="0 0 24 24"
-      fill="none"
-    >
-      <path
-        className="fill-none stroke-red-600"
-        d="M16.88,22.5H7.12a1.9,1.9,0,0,1-1.9-1.8L4.36,5.32H19.64L18.78,20.7A1.9,1.9,0,0,1,16.88,22.5Z"
-      />
-      <line
-        className="fill-none stroke-red-600"
-        x1="2.45"
-        y1="5.32"
-        x2="21.55"
-        y2="5.32"
-      />
-      <path
-        className="fill-none stroke-red-600"
-        d="M10.09,1.5h3.82a1.91,1.91,0,0,1,1.91,1.91V5.32a0,0,0,0,1,0,0H8.18a0,0,0,0,1,0,0V3.41A1.91,1.91,0,0,1,10.09,1.5Z"
-      />
-      <line
-        className="fill-none stroke-red-600"
-        x1="12"
-        y1="8.18"
-        x2="12"
-        y2="19.64"
-      />
-      <line
-        className="fill-none stroke-red-600"
-        x1="15.82"
-        y1="8.18"
-        x2="15.82"
-        y2="19.64"
-      />
-      <line
-        className="fill-none stroke-red-600"
-        x1="8.18"
-        y1="8.18"
-        x2="8.18"
-        y2="19.64"
-      />
-    </svg>
-  );
-}
-
-function MyTooltip({
-  children,
-  title,
-}: {
-  children: React.ReactNode;
-  title: string;
-}) {
-  return (
-    <Tooltip.Provider>
-      <Tooltip.Root delayDuration={0}>
-        <Tooltip.Trigger asChild>{children}</Tooltip.Trigger>
-        <Tooltip.Portal>
-          <Tooltip.Content
-            className="data-[state=delayed-open]:data-[side=top]:animate-slideDownAndFade data-[state=delayed-open]:data-[side=right]:animate-slideLeftAndFade data-[state=delayed-open]:data-[side=left]:animate-slideRightAndFade data-[state=delayed-open]:data-[side=bottom]:animate-slideUpAndFade text-violet11 select-none rounded-lg bg-day-100 px-[15px] py-[10px] text-[15px] leading-none shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] will-change-[transform,opacity] dark:bg-night-500 dark:shadow-[hsl(0_0%_0%_/_35%)_0px_10px_38px_-10px,_hsl(0_0%_0%_/_35%)_0px_10px_20px_-15px]"
-            sideOffset={5}
-          >
-            {title}
-            <Tooltip.Arrow className="fill-day-100 dark:fill-night-500" />
-          </Tooltip.Content>
-        </Tooltip.Portal>
-      </Tooltip.Root>
-    </Tooltip.Provider>
   );
 }
 

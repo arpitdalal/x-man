@@ -29,6 +29,8 @@ import MyLinkBtn from "~/components/MyLinkBtn";
 import MyMultiSelect from "~/components/MyMultiSelect";
 import type { SelectValue } from "react-tailwindcss-select/dist/components/type";
 import { sanitizeAmount } from "~/utils/server";
+import { HelpCircle } from "lucide-react";
+import MyTooltip from "~/components/MyTooltip";
 
 export const meta: MetaFunction = () => {
   return {
@@ -67,7 +69,7 @@ type ActionData = {
     title?: string;
     amount?: string;
     categories?: string;
-    addInTenPer?: boolean;
+    seva?: boolean;
   };
 };
 export async function action({ params, request }: ActionArgs) {
@@ -82,7 +84,7 @@ export async function action({ params, request }: ActionArgs) {
       const title = form.get("title");
       const amount = form.get("amount");
       const categories = form.get("categories");
-      const addInTenPer = form.get("addInTenPer") ? true : false;
+      const seva = form.get("seva") ? true : false;
       const date = form.get("date") || new Date().getDate().toString();
       const redirectTo = form.get("redirectTo") || "/app";
 
@@ -101,7 +103,7 @@ export async function action({ params, request }: ActionArgs) {
             fields: {
               title: String(title) ?? "",
               amount: String(amount) ?? "",
-              addInTenPer,
+              seva,
             },
           },
           403
@@ -117,7 +119,7 @@ export async function action({ params, request }: ActionArgs) {
           month: month,
           year: year,
           categories,
-          addInTenPer,
+          seva,
         },
       });
 
@@ -128,7 +130,7 @@ export async function action({ params, request }: ActionArgs) {
             fields: {
               title,
               amount,
-              addInTenPer,
+              seva,
             },
           },
           403
@@ -190,14 +192,20 @@ export default function New() {
             />
           </div>
           <div className="flex flex-row items-center gap-2">
-            <label htmlFor="addInTenPer">Add this income in 10% counting</label>
+            <label htmlFor="seva">Seva</label>
+            <MyTooltip title="Include this income in 10% seva">
+              <button type="button">
+                <HelpCircle className="h-4 w-4" />
+                <span className="sr-only">Include this income in 10% seva</span>
+              </button>
+            </MyTooltip>
             <Switch.Root
               className="relative h-[25px] w-[42px] cursor-default rounded-full bg-blackA9 shadow-[0_2px_10px] shadow-blackA7 outline-none focus:shadow-[0_0_0_2px] focus:shadow-black radix-state-checked:bg-accent-purple"
-              id="addInTenPer"
-              name="addInTenPer"
+              id="seva"
+              name="seva"
               defaultChecked={
-                actionData?.fields?.addInTenPer !== undefined
-                  ? actionData?.fields?.addInTenPer
+                actionData?.fields?.seva !== undefined
+                  ? actionData?.fields?.seva
                   : true
               }
             >

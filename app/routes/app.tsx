@@ -53,7 +53,9 @@ export default function App() {
 
   return (
     <div className="flex h-screen flex-col">
-      <Header profile={profile} />
+      <div>
+        <Header profile={profile} />
+      </div>
       <div className="flex-1">
         <Outlet />
       </div>
@@ -98,7 +100,7 @@ export function ErrorBoundary({ error }: { error: Error }) {
 
 function Header({ profile }: { profile: Profile }) {
   return (
-    <header className="pt-3">
+    <header className="bg-day-100 pt-3 dark:bg-night-700">
       <div className="flex items-center justify-between px-5 lg:px-20">
         <Link to="/" className="text-4xl sm:text-5xl">
           X Man

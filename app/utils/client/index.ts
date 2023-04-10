@@ -26,11 +26,11 @@ export function getStringFromOptions(options: Array<Option>) {
   return options.map(option => option.value).sort().toString();
 }
 
-export const IN_TEN_PERCENT_CATEGORY = {
+export const SEVA_CATEGORY = {
     created_at: "",
     expense: false,
     id: "",
-    name: "In Ten Percent",
+    name: "Seva",
     updated_at: "",
     user_id: "*",
 } satisfies Category;

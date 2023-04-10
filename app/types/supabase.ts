@@ -75,39 +75,39 @@ export interface Database {
       }
       income: {
         Row: {
-          addInTenPer: boolean
           amount: string
           categories: string | null
           created_at: string | null
           day: string
           id: string
           month: string
+          seva: boolean
           title: string
           updated_at: string | null
           user_id: string
           year: string
         }
         Insert: {
-          addInTenPer?: boolean
           amount: string
           categories?: string | null
           created_at?: string | null
           day: string
           id?: string
           month: string
+          seva?: boolean
           title: string
           updated_at?: string | null
           user_id: string
           year: string
         }
         Update: {
-          addInTenPer?: boolean
           amount?: string
           categories?: string | null
           created_at?: string | null
           day?: string
           id?: string
           month?: string
+          seva?: boolean
           title?: string
           updated_at?: string | null
           user_id?: string
