@@ -72,6 +72,8 @@ export async function loader({ params, request }: LoaderArgs) {
     categories: getAllCategories({ userId }),
   });
 
+  console.log(categories);
+
   let sortedCategories: Array<Category> = categories
     ? [SEVA_CATEGORY, ...categories]
     : [SEVA_CATEGORY];
