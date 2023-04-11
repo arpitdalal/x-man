@@ -9,7 +9,7 @@ import {
   type SupabaseClientOptions,
 } from "@supabase/supabase-js";
 import { safeRedirect } from "remix-utils";
-import type { Expense, Income } from "~/types";
+import type { Category, Expense, Income } from "~/types";
 import type { Database } from "~/types/supabase";
 import { SEVA_CATEGORY } from "~/utils/client";
 
@@ -846,6 +846,37 @@ export async function getAllExpenseCategories({
   }
 }
 
+type GetAllUserExpenseCategoriesArgs = {
+  userId: User["id"];
+};
+export async function getAllUserExpenseCategories({
+  userId,
+}: GetAllUserExpenseCategoriesArgs) {
+  try {
+    const { data: categories, error } = await supabaseAdmin
+      .from("categories")
+      .select()
+      .eq("expense", true)
+      .in("user_id", [userId]);
+    if (error || !categories) {
+      console.log("getAllUserExpenseCategories", error);
+      return {
+        error: error.message,
+      };
+    }
+
+    return {
+      expenseCategories: categories,
+    };
+  } catch (error) {
+    // TODO: log error nicely
+    console.log("getAllUserExpenseCategories", error);
+    return {
+      error: "Something went wrong",
+    };
+  }
+}
+
 type GetAllIncomeCategoriesArgs = {
   userId: User["id"];
 };
@@ -877,19 +908,42 @@ export async function getAllIncomeCategories({
   }
 }
 
-type GetAllDefaultCategoriesArgs = {
+type GetAllUserIncomeCategoriesArgs = {
   userId: User["id"];
-  expense: boolean;
 };
-export async function getAllDefaultCategories({
+export async function getAllUserIncomeCategories({
   userId,
-  expense,
-}: GetAllDefaultCategoriesArgs) {
+}: GetAllUserIncomeCategoriesArgs) {
   try {
     const { data: categories, error } = await supabaseAdmin
       .from("categories")
       .select()
-      .eq("expense", expense)
+      .eq("expense", false)
+      .in("user_id", [userId]);
+    if (error || !categories) {
+      console.log("getAllUserIncomeCategories", error);
+      return {
+        error,
+      };
+    }
+
+    return {
+      incomeCategories: categories,
+    };
+  } catch (error) {
+    // TODO: log error nicely
+    console.log("getAllUserIncomeCategories", error);
+    return {
+      error: "Something went wrong",
+    };
+  }
+}
+
+export async function getAllDefaultCategories() {
+  try {
+    const { data: categories, error } = await supabaseAdmin
+      .from("categories")
+      .select()
       .eq("user_id", "*");
     if (error || !categories) {
       console.log("getAllDefaultCategories", error);
@@ -903,6 +957,66 @@ export async function getAllDefaultCategories({
     // TODO: log error nicely
     console.log("getAllDefaultCategories", error);
     return {
+      error: "Something went wrong",
+    };
+  }
+}
+
+type GetAllUserCategoriesArgs = {
+  userId: User["id"];
+};
+export async function getAllUserCategories({
+  userId,
+}: GetAllUserCategoriesArgs) {
+  try {
+    const { data: categories, error } = await supabaseAdmin
+      .from("categories")
+      .select()
+      .eq("user_id", userId);
+    if (error || !categories) {
+      console.log("getAllUserCategories", error);
+      return {
+        success: false,
+      };
+    }
+
+    return { categories };
+  } catch (error) {
+    // TODO: log error nicely
+    console.log("getAllUserCategories", error);
+    return {
+      error: "Something went wrong",
+    };
+  }
+}
+
+type InsertCategoryArgs = {
+  category: Pick<Category, "name" | "expense">;
+  userId: User["id"];
+};
+export async function insertCategory({ userId, category }: InsertCategoryArgs) {
+  try {
+    const { data: newCategory, error } = await supabaseAdmin
+      .from("categories")
+      .insert({
+        ...category,
+        user_id: userId,
+      })
+      .single();
+
+    if (error || !newCategory) {
+      console.log("insertCategory ", error);
+      return {
+        success: false,
+      };
+    }
+
+    return { success: true };
+  } catch (error) {
+    // TODO: log error nicely
+    console.log("insertCategory ", error);
+    return {
+      success: false,
       error: "Something went wrong",
     };
   }

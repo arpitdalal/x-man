@@ -5,3 +5,7 @@
 .custom-scrollbar {
   @apply scrollbar-thin scrollbar-thumb-rounded scrollbar-track-rounded scrollbar-track-night-100 scrollbar-thumb-night-200 dark:scrollbar-thumb-night-400 dark:scrollbar-track-night-600;
 }
+
+.custom-select {
+  @apply rounded-md bg-day-100 text-night-700 dark:bg-night-700 dark:text-day-100;
+}

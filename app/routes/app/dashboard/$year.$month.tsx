@@ -22,7 +22,7 @@ import { DateContext } from "~/utils/client/DateContext";
 import MyLinkBtn from "~/components/MyLinkBtn";
 import { promiseHash, unauthorized } from "remix-utils";
 import FilterChip from "~/components/FilterChip";
-import { SEVA_CATEGORY } from "~/utils/client";
+import { SEVA_CATEGORY, getRelativeTime } from "~/utils/client";
 import MyTooltip from "~/components/MyTooltip";
 import {
   ChevronRightIcon,
@@ -31,6 +31,7 @@ import {
   EditIcon,
   Trash2Icon,
 } from "lucide-react";
+import Divider from "~/components/Divider";
 
 interface ModifiedExpenseAndIncome extends Omit<Expense, "categories"> {
   type: "income" | "expense";
@@ -49,8 +50,8 @@ export async function loader({ params, request }: LoaderArgs) {
   }
   const year = params.year || new Date().getFullYear().toString();
   const month = params.month || (new Date().getMonth() + 1).toString();
-  const url = new URL(request.url);
-  const tags = url.searchParams.getAll("tags") ?? [];
+  const searchParams = new URL(request.url).searchParams;
+  const tags = searchParams.getAll("tags") ?? [];
 
   const {
     expenses: { expenses, filteredExpenses },
@@ -323,7 +324,7 @@ export default function Month() {
       nextYear += 1;
     }
 
-    return `/app/dashboard/${nextYear}/${nextMonth}`;
+    return `/app/dashboard/${nextYear}/${nextMonth}${location.search}`;
   };
   const goPrevLink = () => {
     let prevMonth = Number(month) - 1;
@@ -334,7 +335,7 @@ export default function Month() {
       prevYear -= 1;
     }
 
-    return `/app/dashboard/${prevYear}/${prevMonth}`;
+    return `/app/dashboard/${prevYear}/${prevMonth}${location.search}`;
   };
 
   const isCurrentYearMonth = year === contextYear && month === contextMonth;
@@ -344,7 +345,7 @@ export default function Month() {
 
   function handleFilterChange() {
     if (formRef) {
-      submitFilters(formRef.current, { replace: true });
+      submitFilters(formRef.current);
     }
   }
 
@@ -377,7 +378,7 @@ export default function Month() {
                 <MyTooltip title="Jump to current month">
                   <button type="button">
                     <Link
-                      to={`/app/dashboard/${contextYear}/${contextMonth}`}
+                      to={`/app/dashboard/${contextYear}/${contextMonth}${location.search}`}
                       aria-label="Jump to current month"
                     >
                       <CalendarDaysIcon size="28" />
@@ -389,7 +390,7 @@ export default function Month() {
             ) : null}
           </div>
         </div>
-        <div className="mt-4 border-t border-night-400 border-opacity-20 dark:border-night-300"></div>
+        <Divider className="mt-4" />
       </div>
       <div className="px-5 pt-4 lg:px-20">
         <p className="text-3xl font-bold">
@@ -417,13 +418,13 @@ export default function Month() {
         </div>
         <div className="mt-8 flex flex-row gap-3">
           <MyLinkBtn
-            to={`income/new?redirectTo=${location.pathname}`}
+            to={`income/new?redirectTo=${location.pathname}${location.search}`}
             className="flex-1 bg-green-200 text-center text-night-700 transition-colors hover:bg-green-300 md:flex-none"
           >
             Add income
           </MyLinkBtn>
           <MyLinkBtn
-            to={`expenses/new?redirectTo=${location.pathname}`}
+            to={`expenses/new?redirectTo=${location.pathname}${location.search}`}
             className="flex-1 bg-red-200 text-center text-night-700 transition-colors hover:bg-red-300 md:flex-none"
           >
             Add expense
@@ -504,7 +505,7 @@ function Card({
               <Link
                 to={`${isIncome ? "income/" : "expenses/"}${
                   expenseOrIncome.id
-                }/edit?redirectTo=${location.pathname}`}
+                }/edit?redirectTo=${location.pathname}${location.search}`}
                 aria-label={`Edit ${expenseOrIncome.title}`}
               >
                 <EditIcon size="24" />
@@ -517,7 +518,7 @@ function Card({
               <Link
                 to={`${isIncome ? "income/" : "expenses/"}${
                   expenseOrIncome.id
-                }/delete?redirectTo=${location.pathname}`}
+                }/delete?redirectTo=${location.pathname}${location.search}`}
                 aria-label={`Delete ${expenseOrIncome.title}`}
               >
                 <Trash2Icon size="24" className="text-red-600" />
@@ -544,18 +545,6 @@ function Card({
       </p>
     </div>
   );
-}
-
-const DAY_MILLISECONDS = 1000 * 60 * 60 * 24;
-
-function getRelativeTime(dateString: string) {
-  const date = dateString === "" ? new Date() : new Date(dateString);
-  const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
-  const daysDifference = Math.round(
-    (date.getTime() - new Date().getTime()) / DAY_MILLISECONDS
-  );
-
-  return rtf.format(daysDifference, "day");
 }
 
 function getFormattedCurrency(number: number) {

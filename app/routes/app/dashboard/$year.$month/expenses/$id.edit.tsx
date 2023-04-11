@@ -118,7 +118,7 @@ export async function action({ params, request }: ActionArgs) {
       const title = form.get("title");
       const amount = form.get("amount");
       const categories = form.get("categories");
-      const redirectTo = form.get("redirectTo") || "/app";
+      const redirectTo = form.get("redirectTo") || "/app/dashboard";
 
       if (
         !title ||
@@ -176,7 +176,7 @@ export async function action({ params, request }: ActionArgs) {
 export default function Edit() {
   const { expense, categories } = useLoaderData<LoaderData>();
   const actionData = useActionData<ActionData>();
-  const redirectTo = useRedirectTo();
+  const redirectTo = useRedirectTo() || "/app/dashboard";
   const initialCategoriesArray = getOptionsFromArray(
     expense.categories?.split(",") || []
   );
@@ -263,7 +263,7 @@ export default function Edit() {
                 </Button>
                 <MyLinkBtn
                   btnType="outline"
-                  to={redirectTo || "/app"}
+                  to={redirectTo || "/app/dashboard"}
                   type="submit"
                 >
                   Cancel

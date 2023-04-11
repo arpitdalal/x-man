@@ -29,20 +29,20 @@ export default function Index() {
   const { user, profile } = useLoaderData<LoaderData>();
 
   return (
-    <div className="h-screen flex items-center justify-center flex-col px-5 lg:px-20">
-      <div className="max-w-8xl mx-auto text-center">
+    <div className="flex h-screen flex-col items-center justify-center px-5 lg:px-20">
+      <div className="mx-auto max-w-8xl text-center">
         <h1 className="text-5xl">X Man</h1>
-        <p className="text-2xl max-w-3xl mt-3">
+        <p className="mt-3 max-w-3xl text-2xl">
           Your personalized e<span className="text-accent-purple">X</span>pense{" "}
           <span className="text-accent-purple">MAN</span>ager
         </p>
-        <div className="mt-8 flex gap-8 justify-center">
+        <div className="mt-8 flex justify-center gap-8">
           {user ? (
             profile ? (
               <MyLinkBtn
-                to="app"
+                to="app/dashboard"
                 size="lg"
-                className="flex gap-3 justify-between items-center"
+                className="flex items-center justify-between gap-3"
               >
                 <img
                   src={profile.avatar_url || ""}
@@ -52,7 +52,7 @@ export default function Index() {
                 Dashboard
               </MyLinkBtn>
             ) : (
-              <MyLinkBtn to="app" size="lg">
+              <MyLinkBtn to="app/dashboard" size="lg">
                 Dashboard
               </MyLinkBtn>
             )

@@ -5,7 +5,7 @@ export default function useRedirectTo() {
   const [searchParams] = useSearchParams();
 
   const redirectTo = useMemo(
-    () => searchParams.get("redirectTo") ?? "/app",
+    () => searchParams.get("redirectTo"),
     [searchParams]
   );
 

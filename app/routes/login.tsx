@@ -39,7 +39,7 @@ export async function action({ request }: ActionArgs) {
 
   const email = form.get("email");
   const password = form.get("password");
-  const redirectTo = form.get("redirectTo") || "/app";
+  const redirectTo = form.get("redirectTo") || "/app/dashboard";
   if (
     !email ||
     !password ||
@@ -90,16 +90,16 @@ export async function action({ request }: ActionArgs) {
 
 export default function Login() {
   const actionData = useActionData<typeof action>();
-  const redirectTo = useRedirectTo();
+  const redirectTo = useRedirectTo() || "/app/dashboard";
 
   return (
-    <div className="h-screen flex items-center justify-center flex-col px-5 lg:px-20">
-      <div className="max-w-8xl mx-auto text-center">
+    <div className="flex h-screen flex-col items-center justify-center px-5 lg:px-20">
+      <div className="mx-auto max-w-8xl text-center">
         <h1 className="text-5xl">Login</h1>
         <Form
           replace
           method="post"
-          className="mt-8 flex flex-col gap-4 items-center"
+          className="mt-8 flex flex-col items-center gap-4"
         >
           <input type="hidden" name="redirectTo" value={redirectTo} />
           <div className="flex flex-col items-start">

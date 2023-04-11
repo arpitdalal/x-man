@@ -11,7 +11,8 @@ import authenticated, {
   deleteIncome,
   getIncomeById,
 } from "~/lib/supabase.server";
-import { Form, useLoaderData } from "@remix-run/react";import {
+import { Form, useLoaderData } from "@remix-run/react";
+import {
   Dialog,
   DialogContent,
   DialogFooter,
@@ -97,7 +98,7 @@ export async function action({ request, params }: ActionArgs) {
 
 export default function Delete() {
   const { income } = useLoaderData<typeof loader>();
-  const redirectTo = useRedirectTo();
+  const redirectTo = useRedirectTo() || "/app/dashboard";
 
   if (!income) {
     return (
@@ -110,35 +111,34 @@ export default function Delete() {
 
   return (
     <Dialog open modal>
-        <DialogContent className="sm:max-w-[450px]">
-          <DialogHeader>
+      <DialogContent className="sm:max-w-[450px]">
+        <DialogHeader>
           <DialogTitle>
             Are you sure you want to delete{" "}
             <span className="mr-[2px] font-bold italic">{income.title}</span>?
           </DialogTitle>
-          </DialogHeader>
-          <DialogDescription>
-            To delete <span className="font-bold italic">{income.title}</span>,
-            click delete or cancel to go back.
-          </DialogDescription>
-          <Form method="post" replace className="flex flex-col gap-4">
-            <DialogFooter>
-
+        </DialogHeader>
+        <DialogDescription>
+          To delete <span className="font-bold italic">{income.title}</span>,
+          click delete or cancel to go back.
+        </DialogDescription>
+        <Form method="post" replace className="flex flex-col gap-4">
+          <DialogFooter>
             <div className="mt-3 flex gap-2">
               <Button type="submit" className="bg-red-600 hover:bg-red-900">
                 delete
               </Button>
               <MyLinkBtn
                 btnType="outline"
-                to={redirectTo || "/app"}
+                to={redirectTo || "/app/dashboard"}
                 type="submit"
               >
                 Cancel
               </MyLinkBtn>
             </div>
-            </DialogFooter>
-          </Form>
-        </DialogContent>
+          </DialogFooter>
+        </Form>
+      </DialogContent>
     </Dialog>
   );
 }

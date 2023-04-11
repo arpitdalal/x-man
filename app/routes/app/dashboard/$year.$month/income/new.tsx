@@ -86,7 +86,7 @@ export async function action({ params, request }: ActionArgs) {
       const categories = form.get("categories");
       const seva = form.get("seva") ? true : false;
       const date = form.get("date") || new Date().getDate().toString();
-      const redirectTo = form.get("redirectTo") || "/app";
+      const redirectTo = form.get("redirectTo") || "/app/dashboard";
 
       if (
         !title ||
@@ -148,7 +148,7 @@ export async function action({ params, request }: ActionArgs) {
 export default function New() {
   const { incomeCategories } = useLoaderData<typeof loader>();
   const actionData = useActionData<ActionData>();
-  const redirectTo = useRedirectTo();
+  const redirectTo = useRedirectTo() || "/app/dashboard";
   const { date } = useContext(DateContext);
   const [selectedCategories, setSelectedCategories] =
     useState<SelectValue>(null);
@@ -222,12 +222,7 @@ export default function New() {
           <DialogFooter>
             <div className="mt-3 flex gap-2">
               <Button type="submit">Add</Button>
-              <MyLinkBtn
-                btnType="outline"
-                to={redirectTo || "/app"}
-                type="submit"
-                className="border-b"
-              >
+              <MyLinkBtn btnType="outline" to={redirectTo} type="submit">
                 Cancel
               </MyLinkBtn>
             </div>

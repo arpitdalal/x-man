@@ -1,5 +1,5 @@
-import { json } from "@remix-run/node";
 import { Outlet, useLoaderData } from "@remix-run/react";
+import { json } from "@remix-run/node";
 import { useEffect, useState } from "react";
 import { DateContext } from "~/utils/client/DateContext";
 
@@ -7,18 +7,18 @@ export async function loader() {
   const date = new Date();
 
   return json({
+    serverDate: date.getDate().toString(),
     serverMonth: String(date.getMonth() + 1),
     serverYear: date.getFullYear().toString(),
-    serverDate: date.getDate().toString(),
   });
 }
 
 export default function Dashboard() {
   const { serverMonth, serverYear, serverDate } =
     useLoaderData<typeof loader>();
-  const [date, setDate] = useState<string>(serverDate);
-  const [month, setMonth] = useState<string>(serverMonth);
-  const [year, setYear] = useState<string>(serverYear);
+  const [date, setDate] = useState(serverDate);
+  const [month, setMonth] = useState(serverMonth);
+  const [year, setYear] = useState(serverYear);
 
   useEffect(() => {
     const date = new Date();

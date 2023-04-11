@@ -7,7 +7,7 @@ export default function LoginMessage({
 }: {
   redirectUrl?: string;
 }) {
-  const redirectTo = useRedirectTo();
+  const redirectTo = useRedirectTo() || "/app/dashboard";
 
   return (
     <FullPageCenter

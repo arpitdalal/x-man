@@ -41,7 +41,9 @@ export async function loader({ request }: LoaderArgs) {
         return json<AppLoaderData>({});
       }
 
-      return json<AppLoaderData>({ profile });
+      return json<AppLoaderData>({
+        profile,
+      });
     },
     () => {
       throw unauthorized({ message: "You must be logged in" });
@@ -198,7 +200,7 @@ function ThemeSwitcher({
           setSelectedMode(newMode);
           handleClick(newMode);
         }}
-        className="rounded-lg bg-day-100 text-night-700 dark:bg-night-700 dark:text-day-100"
+        className="custom-select"
       >
         <option value="system">System</option>
         <option value="light">Light</option>

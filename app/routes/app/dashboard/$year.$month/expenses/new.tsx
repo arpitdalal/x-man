@@ -81,7 +81,7 @@ export async function action({ params, request }: ActionArgs) {
       const amount = form.get("amount");
       const categories = form.get("categories");
       const date = form.get("date") || new Date().getDate().toString();
-      const redirectTo = form.get("redirectTo") || "/app";
+      const redirectTo = form.get("redirectTo") || "/app/dashboard";
 
       if (
         !title ||
@@ -140,7 +140,7 @@ export async function action({ params, request }: ActionArgs) {
 export default function New() {
   const { expenseCategories } = useLoaderData<typeof loader>();
   const actionData = useActionData<ActionData>();
-  const redirectTo = useRedirectTo();
+  const redirectTo = useRedirectTo() || "/app/dashboard";
   const { date } = useContext(DateContext);
   const [selectedCategories, setSelectedCategories] =
     useState<SelectValue>(null);
@@ -197,9 +197,8 @@ export default function New() {
               <Button type="submit">Add</Button>
               <MyLinkBtn
                 btnType="outline"
-                to={redirectTo || "/app"}
+                to={redirectTo || "/app/dashboard"}
                 type="submit"
-                className="border-b"
               >
                 Cancel
               </MyLinkBtn>

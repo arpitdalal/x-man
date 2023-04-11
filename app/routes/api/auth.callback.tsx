@@ -12,7 +12,7 @@ export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
   const formDataSession = formData.get("session") as string | null;
   const event = formData.get("event") as AuthChangeEvent | null;
-  const redirectTo = String(formData.get("redirectTo")) || "/app";
+  const redirectTo = formData.get("redirectTo") || "/app/dashboard";
   if (!formDataSession || !event) {
     return redirect("/login");
   }
@@ -54,7 +54,10 @@ export default function AuthCallback() {
         const formData = new FormData();
         formData.append("session", JSON.stringify(session));
         formData.append("event", event);
-        formData.append("redirectTo", searchParams.get("redirectTo") || "/app");
+        formData.append(
+          "redirectTo",
+          searchParams.get("redirectTo") || "/app/dashboard"
+        );
 
         fetcher.submit(formData, { method: "post" });
       }

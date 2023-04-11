@@ -1,20 +1,8 @@
 import { cn } from "~/utils/client";
-
-export const SolidBtnSmClassName =
-  "transition-colors py-2 px-6 bg-accent-purple text-day-100 rounded-lg hover:bg-accent-dark-purple disabled:bg-opacity-30 disabled:hover:bg-accent-purple disabled:hover:bg-opacity-30";
-export const SolidBtnMdClassName =
-  "transition-colors py-2 px-7 bg-accent-purple text-day-100 rounded-lg hover:bg-accent-dark-purple text-xl disabled:bg-opacity-30 disabled:hover:bg-accent-purple disabled:hover:bg-opacity-30";
-export const SolidBtnLgClassName =
-  "transition-colors py-2 px-8 bg-accent-purple text-day-100 rounded-lg hover:bg-accent-dark-purple text-2xl disabled:bg-opacity-30 disabled:hover:bg-accent-purple disabled:hover:bg-opacity-30";
-export const OutlineBtnSmClassName =
-  "py-2 px-6 border transition-colors border-accent-purple text-night-700 dark:text-day-100 hover:text-day-100 rounded-lg hover:bg-accent-purple disabled:border-opacity-30 disabled:hover:text-night-700 disabled:hover:dark:text-day-100 disabled:hover:bg-transparent";
-export const OutlineBtnMdClassName =
-  "py-2 px-7 border transition-colors border-accent-purple text-night-700 dark:text-day-100 hover:text-day-100 rounded-lg hover:bg-accent-purple text-xl disabled:border-opacity-30 disabled:hover:text-night-700 disabled:hover:dark:text-day-100 disabled:hover:bg-transparent";
-export const OutlineBtnLgClassName =
-  "py-2 px-8 border transition-colors border-accent-purple text-night-700 dark:text-day-100 hover:text-day-100 rounded-lg hover:bg-accent-purple text-2xl disabled:border-opacity-30 disabled:hover:text-night-700 disabled:hover:dark:text-day-100 disabled:hover:bg-transparent";
 export interface BtnAndLinkProps {
   size?: "lg" | "md" | "sm";
   btnType?: "outline" | "solid";
+  as?: "a" | "button";
 }
 
 interface ButtonProps extends BtnAndLinkProps {
@@ -26,28 +14,42 @@ export default function Button({
   size = "md",
   className,
   btnType = "solid",
+  as = "button",
   ...rest
 }: ButtonProps & JSX.IntrinsicElements["button"]) {
-  let customClassName = SolidBtnMdClassName;
-  if (size === "sm" && btnType === "solid") {
-    customClassName = SolidBtnSmClassName;
-  }
-  if (size === "lg" && btnType === "solid") {
-    customClassName = SolidBtnLgClassName;
-  }
-  if (size === "sm" && btnType === "outline") {
-    customClassName = OutlineBtnSmClassName;
-  }
-  if (size === "md" && btnType === "outline") {
-    customClassName = OutlineBtnMdClassName;
-  }
-  if (size === "lg" && btnType === "outline") {
-    customClassName = OutlineBtnLgClassName;
-  }
+  let customClassName = cn(getTypeClassNames(btnType), getSizeClassNames(size));
 
   return (
     <button className={cn(customClassName, className)} {...rest}>
       {children}
     </button>
   );
+}
+
+export function getTypeClassNames(type: BtnAndLinkProps["btnType"]) {
+  switch (type) {
+    case "solid": {
+      return "transition-colors py-2 bg-accent-purple text-day-100 rounded-lg hover:bg-accent-dark-purple disabled:bg-opacity-30 disabled:hover:bg-accent-purple disabled:hover:bg-opacity-30";
+    }
+    case "outline": {
+      return "py-2 border transition-colors border-accent-purple text-night-700 dark:text-day-100 hover:text-day-100 rounded-lg hover:bg-accent-purple disabled:border-opacity-30 disabled:hover:text-night-700 disabled:hover:dark:text-day-100 disabled:hover:bg-transparent";
+    }
+    default: {
+      return "";
+    }
+  }
+}
+
+export function getSizeClassNames(size: BtnAndLinkProps["size"]) {
+  switch (size) {
+    case "md": {
+      return "text-xl px-7";
+    }
+    case "lg": {
+      return "text-2xl px-8";
+    }
+    default: {
+      return "px-6";
+    }
+  }
 }
