@@ -99,7 +99,10 @@ async function handleFetch(event) {
       await cache.put(event.request, response.clone());
       return response;
     } catch (error) {
-      debug("Serving data from network failed, falling back to cache", url.pathname + url.search);
+      debug(
+        "Serving data from network failed, falling back to cache",
+        url.pathname + url.search
+      );
       const response = await caches.match(event.request);
       if (response) {
         response.headers.set("X-Remix-Worker", "yes");
@@ -122,7 +125,10 @@ async function handleFetch(event) {
       await cache.put(event.request, response.clone());
       return response;
     } catch (error) {
-      debug("Serving document from network failed, falling back to cache", url.pathname);
+      debug(
+        "Serving document from network failed, falling back to cache",
+        url.pathname
+      );
       const response = await caches.match(event.request);
       if (response) {
         return response;
@@ -185,6 +191,9 @@ self.addEventListener("fetch", (event) => {
     })()
   );
 });
-async function appHandleFetch(event, { error, response }) {
+async function appHandleFetch(event, {
+  error,
+  response
+}) {
   return response;
 }

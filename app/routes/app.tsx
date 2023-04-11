@@ -18,6 +18,12 @@ import authenticated, { getProfileById } from "~/lib/supabase.server";
 import type { Mode } from "~/root";
 import type { Profile } from "~/types";
 import MyNavLink from "~/components/MyNavLink";
+import {
+  LayoutDashboardIcon,
+  LayoutGridIcon,
+  SlidersHorizontalIcon,
+} from "lucide-react";
+import MobileNavLink from "~/components/MobileNavLink";
 
 export const meta: MetaFunction = () => {
   return { title: "Dashboard | X Man" };
@@ -55,9 +61,27 @@ export default function App() {
     <div className="flex h-screen flex-col">
       <Header profile={profile} />
       <div className="flex-1">
+        <div className="hidden md:block">
+          <div className="sticky top-0 mt-4 flex gap-3 bg-day-200 px-5 dark:bg-night-500 lg:px-20">
+            <MyNavLink to="dashboard">Dashboard</MyNavLink>
+            <MyNavLink to="categories">Categories</MyNavLink>
+            <MyNavLink to="presets">Presets</MyNavLink>
+          </div>
+        </div>
         <Outlet />
       </div>
       <Footer />
+      <div className="sticky bottom-0 mt-4 flex justify-between gap-3 bg-day-200 px-5 dark:bg-night-500 md:hidden lg:px-20">
+        <MobileNavLink to="dashboard">
+          <LayoutDashboardIcon className="mx-auto" />
+        </MobileNavLink>
+        <MobileNavLink to="categories">
+          <LayoutGridIcon className="mx-auto" />
+        </MobileNavLink>
+        <MobileNavLink to="presets">
+          <SlidersHorizontalIcon className="mx-auto" />
+        </MobileNavLink>
+      </div>
     </div>
   );
 }
@@ -120,11 +144,6 @@ function Header({ profile }: { profile: Profile }) {
           </Form>
         </div>
       </header>
-      <div className="sticky top-0 mt-4 flex gap-3 bg-day-200 px-5 dark:bg-night-500 lg:px-20">
-        <MyNavLink to="dashboard">Dashboard</MyNavLink>
-        <MyNavLink to="categories">Categories</MyNavLink>
-        <MyNavLink to="presets">Presets</MyNavLink>
-      </div>
     </>
   );
 }
