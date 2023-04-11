@@ -73,10 +73,13 @@ export async function loader({ params, request }: LoaderArgs) {
   });
 
   console.log(categories);
-
-  let sortedCategories: Array<Category> = categories
-    ? [SEVA_CATEGORY, ...categories]
-    : [SEVA_CATEGORY];
+  
+  let sortedCategories =
+  categories && categories?.length > 0
+  ? [SEVA_CATEGORY, ...categories]
+  : [SEVA_CATEGORY] satisfies Array<Category>;
+  
+  console.log(sortedCategories);
 
   if (categories && tags.length > 0) {
     const selectedCategories = categories.filter((category) =>
