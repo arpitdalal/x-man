@@ -55,7 +55,6 @@ export async function loader({ params, request }: LoaderArgs) {
   const {
     expenses: { expenses, filteredExpenses },
     income: { income, filteredIncome },
-    categories: { categories },
   } = await promiseHash({
     expenses: getAllExpenses({
       userId,
@@ -69,8 +68,8 @@ export async function loader({ params, request }: LoaderArgs) {
       year,
       tags,
     }),
-    categories: getAllCategories({ userId }),
   });
+  const { categories } = await getAllCategories({ userId })
 
   console.log(categories);
   
