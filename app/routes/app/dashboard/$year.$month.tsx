@@ -70,15 +70,11 @@ export async function loader({ params, request }: LoaderArgs) {
     }),
   });
   const { categories } = await getAllCategories({ userId })
-
-  console.log(categories);
   
   let sortedCategories =
   categories && categories?.length > 0
   ? [SEVA_CATEGORY, ...categories]
   : [SEVA_CATEGORY] satisfies Array<Category>;
-  
-  console.log(sortedCategories);
 
   if (categories && tags.length > 0) {
     const selectedCategories = categories.filter((category) =>

@@ -12,7 +12,6 @@ const DATA_CACHE = "data-cache";
 const DOCUMENT_CACHE = "document-cache";
 
 function debug(...messages: any[]) {
-  console.debug(...messages);
   if (process.env.NODE_ENV === "development") {
     console.debug(...messages);
   }
