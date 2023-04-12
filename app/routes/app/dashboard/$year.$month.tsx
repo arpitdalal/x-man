@@ -351,7 +351,7 @@ export default function Month() {
 
   return (
     <>
-      <div className="sticky top-0 md:top-[40px] bg-day-100 dark:bg-night-700">
+      <div className="mobile-top-sticky-bar sticky md:top-[40px] bg-day-100 dark:bg-night-700">
         <div className="px-5 pt-5 lg:px-20">
           <div className="flex items-center gap-4">
             <div className="flex">

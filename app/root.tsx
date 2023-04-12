@@ -19,13 +19,42 @@ import { cn } from "~/utils/client";
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
   title: "Home | X Man",
-  viewport: "width=device-width,initial-scale=1",
+  viewport: "width=device-width,viewport-fit=cover,initial-scale=1",
   "color-scheme": "dark light",
+  "apple-mobile-web-app-capable": "yes",
+  "apple-mobile-web-app-status-bar-style": "default",
+  "msapplication-TileColor": "#6A44FF",
 });
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
   { rel: "stylesheet", href: nProgressCss },
+  {
+    rel: "apple-touch-icon",
+    sizes: "180x180",
+    href: "icons/apple-icon.png",
+  },
+  {
+    rel: "icon",
+    type: "image/png",
+    sizes: "32x32",
+    href: "icons/favicon-32x32.png",
+  },
+  {
+    rel: "icon",
+    type: "image/png",
+    sizes: "16x16",
+    href: "icons/favicon-16x16.png",
+  },
+  {
+    rel: "manifest",
+    href: "resources/manifest.json",
+  },
+  {
+    rel: "mask-icon",
+    href: "icons/safari-pinned-tab.svg",
+    color: "#6a44ff",
+  },
 ];
 
 export type Mode = "system" | "light" | "dark";
@@ -63,7 +92,10 @@ export default function App() {
     <html lang="en" className={cn("overscroll-none", theme)}>
       <head>
         <Meta />
-        <link rel="manifest" href="/resources/manifest.json" />
+        <meta
+          name="theme-color"
+          content={theme === "dark" ? "#090909" : "#F7F5FF"}
+        />
         <Links />
       </head>
       <body className="custom-scrollbar overscroll-none bg-day-100 text-night-700 dark:bg-night-700 dark:text-day-200">

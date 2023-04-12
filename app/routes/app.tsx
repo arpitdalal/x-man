@@ -60,30 +60,18 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="h-safe-screen flex flex-col">
       <Header profile={profile} />
       <div className="flex-1">
-        <div className="hidden md:block">
-          <div className="sticky top-0 mt-4 flex gap-3 bg-day-200 px-5 dark:bg-night-500 lg:px-20">
-            <MyNavLink to="dashboard">Dashboard</MyNavLink>
-            <MyNavLink to="categories">Categories</MyNavLink>
-            <MyNavLink to="presets">Presets</MyNavLink>
-          </div>
+        <div className="sticky top-0 mt-4 hidden gap-3 bg-day-200 px-5 dark:bg-night-500 md:flex lg:px-20">
+          <MyNavLink to="dashboard">Dashboard</MyNavLink>
+          <MyNavLink to="categories">Categories</MyNavLink>
+          <MyNavLink to="presets">Presets</MyNavLink>
         </div>
         <Outlet />
       </div>
       <Footer />
-      <div className="sticky bottom-0 mt-4 flex justify-between gap-3 bg-day-200 px-5 dark:bg-night-500 md:hidden lg:px-20">
-        <MobileNavLink to="dashboard">
-          <LayoutDashboardIcon className="mx-auto" />
-        </MobileNavLink>
-        <MobileNavLink to="categories">
-          <LayoutGridIcon className="mx-auto" />
-        </MobileNavLink>
-        <MobileNavLink to="presets">
-          <SlidersHorizontalIcon className="mx-auto" />
-        </MobileNavLink>
-      </div>
+      <MobileBar />
     </div>
   );
 }
@@ -147,6 +135,72 @@ function Header({ profile }: { profile: Profile }) {
         </div>
       </header>
     </>
+  );
+}
+
+function MobileBar() {
+  return (
+    <div className="mobile-bottom-sticky-bar sticky bg-day-200 dark:bg-night-500 md:hidden">
+      <div className="grid min-h-[48px] w-full grid-flow-col items-stretch gap-x-8">
+        <MobileNavLink to="dashboard">
+          {({ isActive }) => {
+            if (isActive) {
+              return (
+                <>
+                  <span
+                    className="absolute inset-x-0 top-0 my-0 mx-auto h-0.5 w-24 bg-accent-purple"
+                    aria-hidden="true"
+                  />
+                  <LayoutDashboardIcon className="mx-auto text-night-700 dark:text-day-100" />
+                </>
+              );
+            } else {
+              return (
+                <LayoutDashboardIcon className="mx-auto text-dark-muted-600 dark:text-light-muted-500" />
+              );
+            }
+          }}
+        </MobileNavLink>
+        <MobileNavLink to="categories">
+          {({ isActive }) => {
+            if (isActive) {
+              return (
+                <>
+                  <span
+                    className="absolute inset-x-0 top-0 my-0 mx-auto h-0.5 w-24 bg-accent-purple"
+                    aria-hidden="true"
+                  />
+                  <LayoutGridIcon className="mx-auto text-night-700 dark:text-day-100" />
+                </>
+              );
+            } else {
+              return (
+                <LayoutGridIcon className="mx-auto text-dark-muted-600 dark:text-light-muted-500" />
+              );
+            }
+          }}
+        </MobileNavLink>
+        <MobileNavLink to="presets">
+          {({ isActive }) => {
+            if (isActive) {
+              return (
+                <>
+                  <span
+                    className="absolute inset-x-0 top-0 my-0 mx-auto h-0.5 w-24 bg-accent-purple"
+                    aria-hidden="true"
+                  />
+                  <SlidersHorizontalIcon className="mx-auto text-night-700 dark:text-day-100" />
+                </>
+              );
+            } else {
+              return (
+                <SlidersHorizontalIcon className="mx-auto text-dark-muted-600 dark:text-light-muted-500" />
+              );
+            }
+          }}
+        </MobileNavLink>
+      </div>
+    </div>
   );
 }
 

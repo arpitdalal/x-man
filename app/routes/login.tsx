@@ -93,7 +93,7 @@ export default function Login() {
   const redirectTo = useRedirectTo() || "/app/dashboard";
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center px-5 lg:px-20">
+    <div className="h-safe-screen flex flex-col items-center justify-center px-5 lg:px-20">
       <div className="mx-auto max-w-8xl text-center">
         <h1 className="text-5xl">Login</h1>
         <Form

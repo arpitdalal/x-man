@@ -29,7 +29,7 @@ export default function Index() {
   const { user, profile } = useLoaderData<LoaderData>();
 
   return (
-    <div className="flex h-screen flex-col items-center justify-center px-5 lg:px-20">
+    <div className="h-safe-screen flex flex-col items-center justify-center px-5 lg:px-20">
       <div className="mx-auto max-w-8xl text-center">
         <h1 className="text-5xl">X Man</h1>
         <p className="mt-3 max-w-3xl text-2xl">
