@@ -32,27 +32,27 @@ export const links: LinksFunction = () => [
   {
     rel: "apple-touch-icon",
     sizes: "180x180",
-    href: "icons/apple-icon.png",
+    href: "/icons/apple-icon.png",
   },
   {
     rel: "icon",
     type: "image/png",
     sizes: "32x32",
-    href: "icons/favicon-32x32.png",
+    href: "/icons/favicon-32x32.png",
   },
   {
     rel: "icon",
     type: "image/png",
     sizes: "16x16",
-    href: "icons/favicon-16x16.png",
+    href: "/icons/favicon-16x16.png",
   },
   {
     rel: "manifest",
-    href: "resources/manifest.json",
+    href: "/resources/manifest.json",
   },
   {
     rel: "mask-icon",
-    href: "icons/safari-pinned-tab.svg",
+    href: "/icons/safari-pinned-tab.svg",
     color: "#6a44ff",
   },
 ];

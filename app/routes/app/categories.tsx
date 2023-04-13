@@ -158,7 +158,7 @@ export default function Categories() {
       </div>
       <Divider className="mt-5" />
       <div className="px-5 lg:px-20">
-        <div className="mt-5">
+        <div className="my-5">
           {defaultCategories ? (
             <div className="flex flex-col flex-wrap gap-8 md:flex-row">
               {defaultCategories.map((category) => (
