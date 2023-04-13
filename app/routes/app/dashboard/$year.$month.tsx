@@ -444,8 +444,8 @@ export default function Month() {
                 key={category.id}
                 className={(checked) => {
                   return checked
-                    ? "cursor-pointer bg-accent-purple"
-                    : "cursor-pointer bg-dark-muted-100 checked:bg-accent-purple hover:bg-dark-muted-200 dark:bg-night-500 dark:hover:bg-night-600";
+                    ? "whitespace-nowrap cursor-pointer bg-accent-purple"
+                    : "whitespace-nowrap cursor-pointer bg-dark-muted-100 checked:bg-accent-purple hover:bg-dark-muted-200 dark:bg-night-500 dark:hover:bg-night-600";
                 }}
                 name="tags"
                 value={category.name}
