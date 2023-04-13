@@ -74,7 +74,7 @@ export async function loader({ params, request }: LoaderArgs) {
   
   let sortedCategories =
   categories && categories?.length > 0
-  ? [SEVA_CATEGORY, ...categories]
+  ? [SEVA_CATEGORY, ...categories] satisfies Array<Category>
   : [SEVA_CATEGORY] satisfies Array<Category>;
 
   if (categories && tags.length > 0) {

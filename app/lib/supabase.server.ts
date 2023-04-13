@@ -8,7 +8,7 @@ import {
   type User,
   type SupabaseClientOptions,
 } from "@supabase/supabase-js";
-import { safeRedirect } from "remix-utils";
+import { promiseHash, safeRedirect } from "remix-utils";
 import type { Category, Expense, Income } from "~/types";
 import type { Database } from "~/types/supabase";
 import { SEVA_CATEGORY } from "~/utils/client";
@@ -792,19 +792,40 @@ type GetAllCategoriesArgs = {
 };
 export async function getAllCategories({ userId }: GetAllCategoriesArgs) {
   try {
-    const { data: categories, error } = await supabaseAdmin
-      .from("categories")
-      .select()
-      .in("user_id", ["*", userId]);
-    if (error || !categories) {
-      console.log("getAllCategories", error);
+    const {
+      userCategories: {
+        categories: userCategories,
+        error: userCategoriesError,
+      },
+      defaultCategories: {
+        categories: defaultCategories,
+        error: defaultCategoriesError,
+      },
+    } = await promiseHash({
+      userCategories: getAllUserCategories({ userId }),
+      defaultCategories: getAllDefaultCategories(),
+    });
+    // const { data: categories, error } = await supabaseAdmin
+    //   .from("categories")
+    //   .select()
+    //   .in("user_id", ["*", userId]);
+    if (userCategoriesError || defaultCategoriesError) {
+      console.log("getAllCategories userCategoriesError", userCategoriesError);
+      console.log(
+        "getAllCategories defaultCategoriesError",
+        defaultCategoriesError
+      );
       return {
-        error: error.message,
+        error: "Something went wrong",
       };
     }
+    const categories = [
+      ...(userCategories || []),
+      ...(defaultCategories || []),
+    ];
 
     console.log("-----------------");
-    console.log(categories.length);
+    console.log("getAllCategories", categories.length);
     console.log("-----------------");
 
     return {
@@ -952,12 +973,13 @@ export async function getAllDefaultCategories() {
     if (error || !categories) {
       console.log("getAllDefaultCategories", error);
       return {
-        success: false,
+        error: error.message,
       };
     }
 
     console.log("-----------------");
-    console.log(categories.length);
+    console.log("getAllDefaultCategories", categories.length);
+    console.log("getAllDefaultCategories Error", error);
     console.log("-----------------");
 
     return { categories };
@@ -965,7 +987,7 @@ export async function getAllDefaultCategories() {
     // TODO: log error nicely
     console.log("getAllDefaultCategories", error);
     return {
-      success: false,
+      error: "Something went wrong",
     };
   }
 }
@@ -984,7 +1006,7 @@ export async function getAllUserCategories({
     if (error || !categories) {
       console.log("getAllUserCategories", error);
       return {
-        success: false,
+        error: error.message,
       };
     }
 
