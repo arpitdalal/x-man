@@ -12,9 +12,9 @@ const DATA_CACHE = "data-cache";
 const DOCUMENT_CACHE = "document-cache";
 
 function debug(...messages: any[]) {
-  // if (process.env.NODE_ENV === "development") {
-  console.log(...messages);
-  // }
+  if (process.env.NODE_ENV === "development") {
+    console.debug(...messages);
+  }
 }
 
 async function handleInstall(event: ExtendableEvent) {
@@ -97,9 +97,6 @@ async function handleFetch(event: FetchEvent): Promise<Response> {
   }
 
   if (isLoaderRequest(event.request)) {
-    console.log("-----------------------");
-    console.log("HERE");
-    console.log("-----------------------");
     try {
       debug("Serving data from network", url.pathname + url.search);
       const response = await fetch(event.request.clone());
