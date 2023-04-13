@@ -23,9 +23,9 @@ if (typeof requestIdleCallback === "function") {
 
 if ("serviceWorker" in navigator) {
   // Use the window load event to keep the page load performant
-  async function loadSW(){
+  async function loadSW() {
     console.log("loaded");
-    
+
     return navigator.serviceWorker
       .register("/entry.worker.js")
       .then(() => navigator.serviceWorker.ready)
@@ -47,11 +47,11 @@ if ("serviceWorker" in navigator) {
       .catch((error) => {
         console.error("Service worker registration failed", error);
       });
-  };
-
-  if (document.readyState === "complete" || document.readyState === "interactive") {
-    loadSW();
-  } else {
-    window.addEventListener("load", loadSW);
   }
+
+  // if (document.readyState === "complete" || document.readyState === "interactive") {
+  //   loadSW();
+  // } else {
+  //   window.addEventListener("load", loadSW);
+  // }
 }
