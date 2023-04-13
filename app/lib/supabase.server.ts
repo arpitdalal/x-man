@@ -803,6 +803,10 @@ export async function getAllCategories({ userId }: GetAllCategoriesArgs) {
       };
     }
 
+    console.log("-----------------");
+    console.log(categories.length);
+    console.log("-----------------");
+
     return {
       categories,
     };
@@ -952,12 +956,16 @@ export async function getAllDefaultCategories() {
       };
     }
 
+    console.log("-----------------");
+    console.log(categories.length);
+    console.log("-----------------");
+
     return { categories };
   } catch (error) {
     // TODO: log error nicely
     console.log("getAllDefaultCategories", error);
     return {
-      error: "Something went wrong",
+      success: false,
     };
   }
 }

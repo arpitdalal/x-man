@@ -19,9 +19,7 @@ var ASSET_CACHE = "asset-cache";
 var DATA_CACHE = "data-cache";
 var DOCUMENT_CACHE = "document-cache";
 function debug(...messages) {
-  if (true) {
-    console.debug(...messages);
-  }
+  console.debug(...messages);
 }
 async function handleInstall(event) {
   debug("Service worker installed");
@@ -92,6 +90,9 @@ async function handleFetch(event) {
     return response;
   }
   if (isLoaderRequest(event.request)) {
+    console.log("-----------------------");
+    console.log("HERE");
+    console.log("-----------------------");
     try {
       debug("Serving data from network", url.pathname + url.search);
       const response = await fetch(event.request.clone());
