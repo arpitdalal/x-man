@@ -969,7 +969,7 @@ export async function getAllDefaultCategories() {
     const { data: categories, error } = await supabaseAdmin
       .from("categories")
       .select("*")
-      .eq("user_id", "*");
+      .eq("user_id", "ALL");
     if (error || !categories) {
       console.log("getAllDefaultCategories", error);
       return {
