@@ -49,12 +49,12 @@ if ("serviceWorker" in navigator) {
       });
   }
 
-  // if (
-  //   document.readyState === "complete" ||
-  //   document.readyState === "interactive"
-  // ) {
-  //   loadSW();
-  // } else {
-  //   window.addEventListener("load", loadSW);
-  // }
+  if (
+    document.readyState === "complete" ||
+    document.readyState === "interactive"
+  ) {
+    loadSW();
+  } else {
+    window.addEventListener("load", loadSW);
+  }
 }

@@ -805,10 +805,6 @@ export async function getAllCategories({ userId }: GetAllCategoriesArgs) {
       userCategories: getAllUserCategories({ userId }),
       defaultCategories: getAllDefaultCategories(),
     });
-    // const { data: categories, error } = await supabaseAdmin
-    //   .from("categories")
-    //   .select("*")
-    //   .in("user_id", ["*", userId]);
     if (userCategoriesError || defaultCategoriesError) {
       console.log("getAllCategories userCategoriesError", userCategoriesError);
       console.log(
@@ -823,10 +819,6 @@ export async function getAllCategories({ userId }: GetAllCategoriesArgs) {
       ...(userCategories || []),
       ...(defaultCategories || []),
     ];
-
-    console.log("-----------------");
-    console.log("getAllCategories", categories.length);
-    console.log("-----------------");
 
     return {
       categories,
@@ -976,11 +968,6 @@ export async function getAllDefaultCategories() {
         error: error.message,
       };
     }
-
-    console.log("-----------------");
-    console.log("getAllDefaultCategories", categories.length);
-    console.log("getAllDefaultCategories Error", error);
-    console.log("-----------------");
 
     return { categories };
   } catch (error) {

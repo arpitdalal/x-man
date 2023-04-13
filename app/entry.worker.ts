@@ -210,22 +210,22 @@ self.addEventListener("push", (event) => {
   // });
 });
 
-// self.addEventListener("fetch", (event) => {
-//   event.respondWith(
-//     (async () => {
-//       const result = {} as
-//         | { error: unknown; response: Response }
-//         | { error: undefined; response: Response };
-//       try {
-//         result.response = await handleFetch(event);
-//       } catch (error) {
-//         result.error = error;
-//       }
+self.addEventListener("fetch", (event) => {
+  event.respondWith(
+    (async () => {
+      const result = {} as
+        | { error: unknown; response: Response }
+        | { error: undefined; response: Response };
+      try {
+        result.response = await handleFetch(event);
+      } catch (error) {
+        result.error = error;
+      }
 
-//       return appHandleFetch(event, result);
-//     })()
-//   );
-// });
+      return appHandleFetch(event, result);
+    })()
+  );
+});
 
 async function appHandleFetch(
   event: FetchEvent,
