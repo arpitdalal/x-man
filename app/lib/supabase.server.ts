@@ -430,7 +430,7 @@ export async function insertExpense({
         ...expense,
         user_id: userId,
       })
-      .select()
+      .select("*")
       .single();
 
     if (error || !newExpense) {
@@ -501,7 +501,7 @@ export async function updateExpense({
       })
       .eq("id", expenseId)
       .eq("user_id", userId)
-      .select()
+      .select("*")
       .single();
 
     if (error || !expense) {
@@ -562,7 +562,7 @@ export async function getAllIncome({
   try {
     const { data: income, error } = await supabaseAdmin
       .from("income")
-      .select()
+      .select("*")
       .order("created_at", { ascending: false })
       .eq("user_id", userId)
       .eq("month", month)
@@ -667,7 +667,7 @@ export async function insertIncome({
         ...income,
         user_id: userId,
       })
-      .select()
+      .select("*")
       .single();
 
     if (error || !newIncome) {
@@ -735,7 +735,7 @@ export async function updateIncome({
       })
       .eq("id", incomeId)
       .eq("user_id", userId)
-      .select()
+      .select("*")
       .single();
 
     if (error || !income) {
@@ -807,7 +807,7 @@ export async function getAllCategories({ userId }: GetAllCategoriesArgs) {
     });
     // const { data: categories, error } = await supabaseAdmin
     //   .from("categories")
-    //   .select()
+    //   .select("*")
     //   .in("user_id", ["*", userId]);
     if (userCategoriesError || defaultCategoriesError) {
       console.log("getAllCategories userCategoriesError", userCategoriesError);
@@ -849,7 +849,7 @@ export async function getAllExpenseCategories({
   try {
     const { data: categories, error } = await supabaseAdmin
       .from("categories")
-      .select()
+      .select("*")
       .eq("expense", true)
       .in("user_id", ["*", userId]);
     if (error || !categories) {
@@ -880,7 +880,7 @@ export async function getAllUserExpenseCategories({
   try {
     const { data: categories, error } = await supabaseAdmin
       .from("categories")
-      .select()
+      .select("*")
       .eq("expense", true)
       .in("user_id", [userId]);
     if (error || !categories) {
@@ -911,7 +911,7 @@ export async function getAllIncomeCategories({
   try {
     const { data: categories, error } = await supabaseAdmin
       .from("categories")
-      .select()
+      .select("*")
       .eq("expense", false)
       .in("user_id", ["*", userId]);
     if (error || !categories) {
@@ -942,7 +942,7 @@ export async function getAllUserIncomeCategories({
   try {
     const { data: categories, error } = await supabaseAdmin
       .from("categories")
-      .select()
+      .select("*")
       .eq("expense", false)
       .in("user_id", [userId]);
     if (error || !categories) {
@@ -968,7 +968,7 @@ export async function getAllDefaultCategories() {
   try {
     const { data: categories, error } = await supabaseAdmin
       .from("categories")
-      .select()
+      .select("*")
       .eq("user_id", "*");
     if (error || !categories) {
       console.log("getAllDefaultCategories", error);
@@ -1001,7 +1001,7 @@ export async function getAllUserCategories({
   try {
     const { data: categories, error } = await supabaseAdmin
       .from("categories")
-      .select()
+      .select("*")
       .eq("user_id", userId);
     if (error || !categories) {
       console.log("getAllUserCategories", error);
