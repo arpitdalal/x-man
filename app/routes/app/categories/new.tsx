@@ -1,6 +1,6 @@
 import { type ActionArgs, json, redirect } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
-import { safeRedirect, unauthorized } from "remix-utils";
+import { safeRedirect, unauthorized, useHydrated } from "remix-utils";
 import Button from "~/components/Button";
 import {
   Dialog,
@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "~/components/Dialog";
 import MyLinkBtn from "~/components/MyLinkBtn";
+import PageOverlayCenter from "~/components/PageOverlayCenter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/Tabs";
 import TextInput from "~/components/TextInput";
 import useRedirectTo from "~/hooks/useRedirectTo";
@@ -79,6 +80,21 @@ export async function action({ request }: ActionArgs) {
 export default function Add() {
   const redirectTo = useRedirectTo() || "/app/categories";
   const actionData = useActionData();
+  const isHydrated = useHydrated();
+  if (!isHydrated) {
+    return (
+      <PageOverlayCenter className="px-4">
+        <div className="mx-auto max-w-4xl rounded-lg bg-day-100 p-8 text-center dark:bg-night-500">
+          <h1 className="text-5xl">Something went wrong</h1>
+          <p className="mt-3 text-2xl">
+            Looks like Javascript didn't load. Either because of bad network or
+            your browser has disabled Javascript. Please reload the page or try
+            again later.
+          </p>
+        </div>
+      </PageOverlayCenter>
+    );
+  }
 
   return (
     <Dialog open modal>

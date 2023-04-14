@@ -7,6 +7,7 @@ import {
 import { Form, useActionData } from "@remix-run/react";
 import { safeRedirect } from "remix-utils";
 import Button from "~/components/Button";
+import { Checkbox } from "~/components/Checkbox";
 import MyLink from "~/components/MyLink";
 import TextInput from "~/components/TextInput";
 import useRedirectTo from "~/hooks/useRedirectTo";
@@ -39,6 +40,7 @@ export async function action({ request }: ActionArgs) {
 
   const email = form.get("email");
   const password = form.get("password");
+  const remember = form.get("remember");
   const redirectTo = form.get("redirectTo") || "/app/dashboard";
   if (
     !email ||
@@ -79,11 +81,15 @@ export async function action({ request }: ActionArgs) {
     return json({ formError: "Something went wrong", fields: { email } }, 500);
   }
 
+  const expiryDate = new Date();
+  const steCookie = remember
+    ? await authCookie.commitSession(session, {
+        expires: new Date(expiryDate.setMonth(expiryDate.getMonth() + 1)),
+      })
+    : await authCookie.commitSession(session);
   return redirect(safeRedirect(redirectTo, "/app"), {
     headers: {
-      "Set-Cookie": await authCookie.commitSession(session, {
-        expires: new Date(Date.now() + 3600),
-      }),
+      "Set-Cookie": steCookie,
     },
   });
 }
@@ -102,7 +108,7 @@ export default function Login() {
           className="mt-8 flex flex-col items-center gap-4"
         >
           <input type="hidden" name="redirectTo" value={redirectTo} />
-          <div className="flex flex-col items-start">
+          <div className="flex w-full flex-col items-start">
             <TextInput
               label="Email"
               id="email"
@@ -110,26 +116,32 @@ export default function Login() {
               name="email"
               defaultValue={actionData?.fields.email}
               autoComplete="email"
+              inputClassName="mt-1"
               required
             />
           </div>
-          <div className="flex flex-col items-start">
+          <div className="flex w-full flex-col items-start">
             <TextInput
               label="Password"
               id="password"
               type="password"
               name="password"
               autoComplete="current-password"
+              inputClassName="mt-1"
               required
             />
           </div>
-          <div className="mt-3">
+          <div className="flex w-full items-center justify-start gap-2">
+            <label htmlFor="remember">Remember for 30 days</label>
+            <Checkbox id="remember" name="remember" />
+          </div>
+          <div className="mt-3 flex w-full justify-start">
             <Button type="submit">Login</Button>
           </div>
         </Form>
         <div className="mt-4 text-left">
           <p>
-            Don't have an account?{" "}
+            Don't have an account yet?{" "}
             <MyLink
               to="/register"
               className="underline hover:text-accent-purple"

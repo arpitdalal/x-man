@@ -63,13 +63,13 @@ const supabaseAdmin = createClient<Database>(
 
 export const authCookie = createCookieSessionStorage({
   cookie: {
-    name: "sb:token",
+    name: "XMAN:token",
     httpOnly: true,
-    maxAge: 60 * 60 * 24 * 30,
+    secure: process.env.NODE_ENV === "production",
+    secrets: [process.env.SESSION_SECRET],
+    // maxAge: 60 * 60 * 24 * 30,
     path: "/",
     sameSite: "lax",
-    secrets: [process.env.SESSION_SECRET],
-    secure: process.env.NODE_ENV === "production",
   },
 });
 

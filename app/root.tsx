@@ -1,5 +1,6 @@
 import { useSWEffect } from "~/utils/client/sw-hook";
-import { json, type LinksFunction, type MetaFunction } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import type { LoaderArgs, LinksFunction, MetaFunction } from "@remix-run/node";
 import {
   Links,
   LiveReload,
@@ -9,18 +10,21 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from "@remix-run/react";
-import { useEffect, useState } from "react";
 import styles from "./tailwind.css";
-import { ThemeContext } from "~/utils/client/ThemeContext";
 import nProgressCss from "./nprogress.css";
 import { useLoadingEffect } from "~/hooks/useLoadingEffect";
 import { cn } from "~/utils/client";
+import {
+  NonFlashOfWrongThemeEls,
+  ThemeProvider,
+  useTheme,
+} from "~/utils/client/theme-provider";
+import { getThemeSession } from "~/utils/server/theme.server";
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
   title: "Home | X Man",
   viewport: "width=device-width,viewport-fit=cover,initial-scale=1",
-  "color-scheme": "dark light",
   "apple-mobile-web-app-capable": "yes",
   "apple-mobile-web-app-status-bar-style": "default",
   "msapplication-TileColor": "#6A44FF",
@@ -57,34 +61,19 @@ export const links: LinksFunction = () => [
   },
 ];
 
-export type Mode = "system" | "light" | "dark";
-export type ThemeContextType = [
-  Mode,
-  React.Dispatch<React.SetStateAction<Mode>>
-];
-
-export function loader() {
+export async function loader({ request }: LoaderArgs) {
   return json({
     ENV: {
       SUPABASE_URL: process.env.SUPABASE_URL,
       SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
     },
+    theme: (await getThemeSession(request)).getTheme(),
   });
 }
 
-export default function App() {
+function App() {
   const loaderData = useLoaderData<typeof loader>();
-  const [mode, setMode] = useState<Mode>("system");
-  const theme = mode === "dark" ? "dark" : "";
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    if (mq.matches) {
-      setMode("dark");
-    }
-    mq.addEventListener("change", (evt) =>
-      setMode(evt.matches ? "dark" : "light")
-    );
-  }, []);
+  const [theme] = useTheme();
   useSWEffect();
   useLoadingEffect();
 
@@ -97,12 +86,11 @@ export default function App() {
           content={theme === "dark" ? "#090909" : "#F7F5FF"}
         />
         <Links />
+        <NonFlashOfWrongThemeEls ssrTheme={Boolean(loaderData.theme)} />
       </head>
       <body className="custom-scrollbar overscroll-none bg-day-100 text-night-700 dark:bg-night-700 dark:text-day-200">
         <main>
-          <ThemeContext.Provider value={{ mode, setMode }}>
-            <Outlet />
-          </ThemeContext.Provider>
+          <Outlet />
         </main>
         <ScrollRestoration getKey={(location) => location.pathname} />
         <script
@@ -114,5 +102,14 @@ export default function App() {
         <LiveReload />
       </body>
     </html>
+  );
+}
+
+export default function AppWithProviders() {
+  const loaderData = useLoaderData<typeof loader>();
+  return (
+    <ThemeProvider specifiedTheme={loaderData.theme}>
+      <App />
+    </ThemeProvider>
   );
 }

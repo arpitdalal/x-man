@@ -5,7 +5,7 @@ import {
   type ActionArgs,
   type MetaFunction,
 } from "@remix-run/node";
-import { safeRedirect, unauthorized } from "remix-utils";
+import { safeRedirect, unauthorized, useHydrated } from "remix-utils";
 import authenticated, {
   authCookie,
   deleteIncome,
@@ -25,6 +25,7 @@ import MyLinkBtn from "~/components/MyLinkBtn";
 import useRedirectTo from "~/hooks/useRedirectTo";
 import ModalMessage from "~/components/ModalMessage";
 import type { Income } from "~/types";
+import PageOverlayCenter from "~/components/PageOverlayCenter";
 
 export const meta: MetaFunction = ({ data }) => {
   if (!data?.income)
@@ -99,6 +100,21 @@ export async function action({ request, params }: ActionArgs) {
 export default function Delete() {
   const { income } = useLoaderData<typeof loader>();
   const redirectTo = useRedirectTo() || "/app/dashboard";
+  const isHydrated = useHydrated();
+  if (!isHydrated) {
+    return (
+      <PageOverlayCenter className="px-4">
+        <div className="mx-auto max-w-4xl rounded-lg bg-day-100 p-8 text-center dark:bg-night-500">
+          <h1 className="text-5xl">Something went wrong</h1>
+          <p className="mt-3 text-2xl">
+            Looks like Javascript didn't load. Either because of bad network or
+            your browser has disabled Javascript. Please reload the page or try
+            again later.
+          </p>
+        </div>
+      </PageOverlayCenter>
+    );
+  }
 
   if (!income) {
     return (

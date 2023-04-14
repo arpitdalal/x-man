@@ -6,7 +6,12 @@ import {
   type MetaFunction,
 } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
-import { promiseHash, safeRedirect, unauthorized } from "remix-utils";
+import {
+  promiseHash,
+  safeRedirect,
+  unauthorized,
+  useHydrated,
+} from "remix-utils";
 import authenticated, {
   authCookie,
   getAllIncomeCategories,
@@ -37,6 +42,7 @@ import { useState } from "react";
 import ModalMessage from "~/components/ModalMessage";
 import { HelpCircle } from "lucide-react";
 import MyTooltip from "~/components/MyTooltip";
+import PageOverlayCenter from "~/components/PageOverlayCenter";
 
 export const meta: MetaFunction = ({ data }) => {
   if (!data?.income)
@@ -202,6 +208,21 @@ export default function Edit() {
       ? income.seva
       : true
   );
+  const isHydrated = useHydrated();
+  if (!isHydrated) {
+    return (
+      <PageOverlayCenter className="px-4">
+        <div className="mx-auto max-w-4xl rounded-lg bg-day-100 p-8 text-center dark:bg-night-500">
+          <h1 className="text-5xl">Something went wrong</h1>
+          <p className="mt-3 text-2xl">
+            Looks like Javascript didn't load. Either because of bad network or
+            your browser has disabled Javascript. Please reload the page or try
+            again later.
+          </p>
+        </div>
+      </PageOverlayCenter>
+    );
+  }
 
   if (!income) {
     return (
@@ -225,88 +246,84 @@ export default function Edit() {
       getStringFromOptions(initialCategoriesArray);
 
   return (
-    <div>
-      <Dialog open modal>
-        <DialogContent className="sm:max-w-[450px]">
-          <DialogHeader>
-            <DialogTitle>
-              Edit <span className="font-bold italic">{income.title}</span>
-            </DialogTitle>
-          </DialogHeader>
-          <DialogDescription>
-            Edit <span className="font-bold italic">{income.title}</span> and
-            then click save
-          </DialogDescription>
-          <Form method="post" replace className="flex flex-col gap-4">
-            <input type="hidden" name="redirectTo" value={redirectTo} />
-            <div className="flex flex-col gap-2">
-              <TextInput
-                label="Title"
-                id="title"
-                type="text"
-                name="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <TextInput
-                label="Amount"
-                id="amount"
-                type="text"
-                name="amount"
-                inputMode="decimal"
-                pattern="[0-9.]*"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-              />
-            </div>
-            <div className="flex flex-row items-center gap-2">
-              <label htmlFor="seva">Seva</label>
-              <MyTooltip title="Include this income in 10% seva">
-                <button type="button">
-                  <HelpCircle className="h-4 w-4" />
-                  <span className="sr-only">
-                    Include this income in 10% seva
-                  </span>
-                </button>
-              </MyTooltip>
-              <Switch.Root
-                className="relative h-6 w-11 rounded-full bg-blackA9 shadow-[0_2px_10px] shadow-blackA7 outline-none focus:shadow-[0_0_0_2px] focus:shadow-black radix-state-checked:bg-accent-purple"
-                id="seva"
-                name="seva"
-                checked={isInTenPer}
-                onCheckedChange={setIsInTenPer}
-              >
-                <Switch.Thumb className="block h-5 w-5 translate-x-0.5 rounded-full bg-white shadow-[0_2px_2px] shadow-blackA7 transition-transform will-change-transform duration-100 radix-state-checked:translate-x-5" />
-              </Switch.Root>
-            </div>
-            <MyMultiSelect
-              categories={categoryNames}
-              selectedCategories={selectedCategories}
-              setSelectedCategories={setSelectedCategories}
-              label="Categories"
+    <Dialog open modal>
+      <DialogContent className="sm:max-w-[450px]">
+        <DialogHeader>
+          <DialogTitle>
+            Edit <span className="font-bold italic">{income.title}</span>
+          </DialogTitle>
+        </DialogHeader>
+        <DialogDescription>
+          Edit <span className="font-bold italic">{income.title}</span> and then
+          click save
+        </DialogDescription>
+        <Form method="post" replace className="flex flex-col gap-4">
+          <input type="hidden" name="redirectTo" value={redirectTo} />
+          <div className="flex flex-col gap-2">
+            <TextInput
+              label="Title"
+              id="title"
+              type="text"
+              name="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               required
             />
-            <DialogFooter>
-              <div className="mt-3 flex gap-2">
-                <Button type="submit" disabled={shouldSubmitBtnBeDisabled}>
-                  Edit
-                </Button>
-                <MyLinkBtn
-                  btnType="outline"
-                  to={redirectTo || "/app/dashboard"}
-                  type="submit"
-                >
-                  Cancel
-                </MyLinkBtn>
-              </div>
-            </DialogFooter>
-          </Form>
-        </DialogContent>
-      </Dialog>
-    </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <TextInput
+              label="Amount"
+              id="amount"
+              type="text"
+              name="amount"
+              inputMode="decimal"
+              pattern="[0-9.]*"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+            />
+          </div>
+          <div className="flex flex-row items-center gap-2">
+            <label htmlFor="seva">Seva</label>
+            <MyTooltip title="Include this income in 10% seva">
+              <button type="button">
+                <HelpCircle className="h-4 w-4" />
+                <span className="sr-only">Include this income in 10% seva</span>
+              </button>
+            </MyTooltip>
+            <Switch.Root
+              className="relative h-6 w-11 rounded-full bg-blackA9 shadow-[0_2px_10px] shadow-blackA7 outline-none focus:shadow-[0_0_0_2px] focus:shadow-black radix-state-checked:bg-accent-purple"
+              id="seva"
+              name="seva"
+              checked={isInTenPer}
+              onCheckedChange={setIsInTenPer}
+            >
+              <Switch.Thumb className="block h-5 w-5 translate-x-0.5 rounded-full bg-white shadow-[0_2px_2px] shadow-blackA7 transition-transform will-change-transform duration-100 radix-state-checked:translate-x-5" />
+            </Switch.Root>
+          </div>
+          <MyMultiSelect
+            categories={categoryNames}
+            selectedCategories={selectedCategories}
+            setSelectedCategories={setSelectedCategories}
+            label="Categories"
+            required
+          />
+          <DialogFooter>
+            <div className="mt-3 flex gap-2">
+              <Button type="submit" disabled={shouldSubmitBtnBeDisabled}>
+                Edit
+              </Button>
+              <MyLinkBtn
+                btnType="outline"
+                to={redirectTo || "/app/dashboard"}
+                type="submit"
+              >
+                Cancel
+              </MyLinkBtn>
+            </div>
+          </DialogFooter>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 }

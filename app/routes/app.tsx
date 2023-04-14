@@ -7,23 +7,24 @@ import {
   useLoaderData,
   useLocation,
 } from "@remix-run/react";
-import { useContext, useState } from "react";
 import { unauthorized } from "remix-utils";
 import Button from "~/components/Button";
 import FullPageCenter from "~/components/FullpageCenter";
 import LoginMessage from "~/components/LoginMessage";
 import MyLink from "~/components/MyLink";
-import { ThemeContext } from "~/utils/client/ThemeContext";
 import authenticated, { getProfileById } from "~/lib/supabase.server";
-import type { Mode } from "~/root";
 import type { Profile } from "~/types";
 import MyNavLink from "~/components/MyNavLink";
 import {
   LayoutDashboardIcon,
   LayoutGridIcon,
+  MoonIcon,
   SlidersHorizontalIcon,
+  SunIcon,
 } from "lucide-react";
 import MobileNavLink from "~/components/MobileNavLink";
+import { Theme, Themed, useTheme } from "~/utils/client/theme-provider";
+import { cn } from "~/utils/client";
 
 export const meta: MetaFunction = () => {
   return { title: "Dashboard | X Man" };
@@ -205,61 +206,60 @@ function MobileBar() {
 }
 
 function Footer() {
-  const { mode, setMode } = useContext(ThemeContext);
-
   return (
     <footer className="flex items-center justify-between border-t border-night-400 border-opacity-20 py-3 px-5 dark:border-night-300 lg:px-20">
       <p className="text-2xl font-bold">X Man</p>
       <div>
-        <ThemeSwitcher mode={mode} setMode={setMode} />
+        <DarkModeToggle />
       </div>
     </footer>
   );
 }
 
-function ThemeSwitcher({
-  mode,
-  setMode,
+const iconTransformOrigin = { transformOrigin: "50% 100px" };
+function DarkModeToggle({
+  variant = "icon",
 }: {
-  mode: Mode;
-  setMode: React.Dispatch<React.SetStateAction<Mode>>;
+  variant?: "icon" | "labelled";
 }) {
-  const [selectedMode, setSelectedMode] = useState(mode);
-
-  function handleClick(clickedMode: Mode) {
-    switch (clickedMode) {
-      case "light": {
-        setMode("light");
-        return;
-      }
-      case "dark": {
-        setMode("dark");
-        return;
-      }
-      default: {
-        setMode("system");
-        return;
-      }
-    }
-  }
-
+  const [, setTheme] = useTheme();
   return (
-    <div className="flex gap-3">
-      <select
-        name="mode"
-        id="mode"
-        value={selectedMode}
-        onChange={(e) => {
-          const newMode = e.target.value as unknown as Mode;
-          setSelectedMode(newMode);
-          handleClick(newMode);
-        }}
-        className="custom-select"
+    <button
+      onClick={() => {
+        setTheme((previousTheme) =>
+          previousTheme === Theme.DARK ? Theme.LIGHT : Theme.DARK
+        );
+      }}
+      className={cn(
+        "border-secondary hover:border-primary focus:border-primary inline-flex h-14 items-center justify-center overflow-hidden rounded-full border-2 p-1 transition focus:outline-none",
+        {
+          "w-14": variant === "icon",
+          "px-8": variant === "labelled",
+        }
+      )}
+    >
+      {/* note that the duration is longer then the one on body, controlling the bg-color */}
+      <div className="relative h-8 w-8">
+        <span
+          className="motion-reduce:duration-[0s] absolute inset-0 rotate-90 transform text-black transition duration-1000 dark:rotate-0 dark:text-white"
+          style={iconTransformOrigin}
+        >
+          <MoonIcon />
+        </span>
+        <span
+          className="motion-reduce:duration-[0s] absolute inset-0 rotate-0 transform text-black transition duration-1000 dark:-rotate-90 dark:text-white"
+          style={iconTransformOrigin}
+        >
+          <SunIcon />
+        </span>
+      </div>
+      <span
+        className={cn("ml-4 text-black dark:text-white", {
+          "sr-only": variant === "icon",
+        })}
       >
-        <option value="system">System</option>
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-      </select>
-    </div>
+        <Themed dark="switch to light mode" light="switch to dark mode" />
+      </span>
+    </button>
   );
 }

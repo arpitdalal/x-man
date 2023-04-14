@@ -1,12 +1,10 @@
-import { useNavigation } from "@remix-run/react";
 import { useCallback, useEffect, useState } from "react";
 import debounce from "just-debounce-it";
 import nProgress from "nprogress";
-import { useSomeFetcherIsSubmitting } from "./useSomeFetcherIsSubmitting";
+import { useGlobalPendingState } from "remix-utils";
 
 export const useLoadingEffect = () => {
-  const { state: transitionState } = useNavigation();
-  const someFetcherIsSubmitting = useSomeFetcherIsSubmitting();
+  const globalState = useGlobalPendingState();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedStart = useCallback(
@@ -37,15 +35,9 @@ export const useLoadingEffect = () => {
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout> | undefined;
 
-    if (
-      (transitionState !== "idle" || someFetcherIsSubmitting) &&
-      !globalIsLoading
-    ) {
+    if (globalState !== "idle" && !globalIsLoading) {
       timeout = setTimeout(() => {
-        if (
-          (transitionState !== "idle" || someFetcherIsSubmitting) &&
-          !globalIsLoading
-        ) {
+        if (!globalIsLoading) {
           setGlobalIsLoading(true);
         }
       }, 10);
@@ -55,13 +47,7 @@ export const useLoadingEffect = () => {
     return () => {
       if (timeout) clearTimeout(timeout);
     };
-  }, [
-    transitionState,
-    someFetcherIsSubmitting,
-    debouncedStart,
-    debouncedDone,
-    globalIsLoading,
-  ]);
+  }, [globalState, debouncedStart, debouncedDone, globalIsLoading]);
 
   useEffect(() => {
     if (globalIsLoading) {
