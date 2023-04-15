@@ -120,7 +120,7 @@ export default function Categories() {
         <h1 className="text-3xl font-bold">Your Categories</h1>
         <div className="mt-5">
           <MyLinkBtn
-            to={`new?redirectTo=${location.pathname}${location.search}`}
+            to={`new/income?redirectTo=${location.pathname}${location.search}`}
           >
             Add
           </MyLinkBtn>

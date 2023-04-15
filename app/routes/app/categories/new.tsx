@@ -1,19 +1,14 @@
 import { type ActionArgs, json, redirect } from "@remix-run/node";
-import { Form, useActionData } from "@remix-run/react";
+import { Outlet } from "@remix-run/react";
 import { safeRedirect, unauthorized, useHydrated } from "remix-utils";
-import Button from "~/components/Button";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/Dialog";
-import MyLinkBtn from "~/components/MyLinkBtn";
 import PageOverlayCenter from "~/components/PageOverlayCenter";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/Tabs";
-import TextInput from "~/components/TextInput";
-import useRedirectTo from "~/hooks/useRedirectTo";
+import Tabs from "~/components/LinkTabs";
 import authenticated, { insertCategory } from "~/lib/supabase.server";
 
 type ActionData = {
@@ -78,8 +73,6 @@ export async function action({ request }: ActionArgs) {
 }
 
 export default function Add() {
-  const redirectTo = useRedirectTo() || "/app/categories";
-  const actionData = useActionData();
   const isHydrated = useHydrated();
   if (!isHydrated) {
     return (
@@ -102,10 +95,48 @@ export default function Add() {
         <DialogHeader>
           <DialogTitle>Add Category</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="income" className="mt-4 w-[400px]">
+        <Tabs
+          links={[
+            { label: "Income", url: "income" },
+            { label: "Expense", url: "expense" },
+          ]}
+        />
+        {/* <div className="mt-4 w-[400px]">
+          <div className="inline-flex items-center justify-center rounded-md bg-night-200 p-1 dark:bg-night-700">
+            <NavLink
+              to={`income${location.search}`}
+              className={({ isActive }) => {
+                return `inline-flex min-w-[100px] items-center justify-center rounded-[0.185rem] px-3 py-1.5  text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50${
+                  isActive
+                    ? " bg-white text-night-700 shadow-sm dark:bg-accent-purple dark:text-day-100"
+                    : ""
+                }`;
+              }}
+            >
+              Income
+            </NavLink>
+            <NavLink
+              to={`expense${location.search}`}
+              className={({ isActive }) => {
+                return `inline-flex min-w-[100px] items-center justify-center rounded-[0.185rem] px-3 py-1.5  text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50${
+                  isActive
+                    ? " bg-white text-night-700 shadow-sm dark:bg-accent-purple dark:text-day-100"
+                    : ""
+                }`;
+              }}
+            >
+              Expense
+            </NavLink>
+          </div>
+        </div> */}
+        {/* <Tabs defaultValue="income" className="mt-4 w-[400px]">
           <TabsList>
-            <TabsTrigger value="income">Income</TabsTrigger>
-            <TabsTrigger value="expense">Expense</TabsTrigger>
+            <Link to={`income${location.search}`}>
+              <p>Income</p>
+            </Link>
+            <Link to={`expense${location.search}`}>
+              <p>Expense</p>
+            </Link>
           </TabsList>
           <TabsContent value="income">
             <Form method="post" replace className="flex flex-col gap-4">
@@ -165,7 +196,8 @@ export default function Add() {
               </DialogFooter>
             </Form>
           </TabsContent>
-        </Tabs>
+        </Tabs> */}
+        <Outlet />
       </DialogContent>
     </Dialog>
   );
