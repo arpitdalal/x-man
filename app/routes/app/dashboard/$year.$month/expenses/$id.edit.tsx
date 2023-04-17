@@ -41,20 +41,20 @@ import { useState } from "react";
 import ModalMessage from "~/components/ModalMessage";
 import PageOverlayCenter from "~/components/PageOverlayCenter";
 
-export const meta: MetaFunction = ({ data }) => {
-  if (!data?.expense)
+export const meta: MetaFunction = ({ data }: { data: LoaderData }) => {
+  if (!data.expense)
     return {
       title: "Not found | X Man",
     };
   return {
-    title: `Edit ${(data as unknown as LoaderData).expense.title} | X Man`,
+    title: `Edit ${data.expense.title} | X Man`,
   };
 };
 
 type LoaderData = {
   message: string;
-  categories: Array<Category>;
-  expense: Expense;
+  categories?: Array<Category>;
+  expense: Expense | null;
 };
 export async function loader({ request, params }: LoaderArgs) {
   const redirectTo = new URL(request.url).searchParams.get("redirectTo");
@@ -84,7 +84,7 @@ export async function loader({ request, params }: LoaderArgs) {
   });
   // const { expense, error } = await getExpenseById({ expenseId: id, userId });
   if (!expense || error) {
-    return json(
+    return json<LoaderData>(
       {
         message: "Not found.",
         expense: null,
@@ -94,7 +94,7 @@ export async function loader({ request, params }: LoaderArgs) {
     );
   }
 
-  return json({
+  return json<LoaderData>({
     expense,
     message: "",
     categories: expenseCategories || [],
@@ -184,7 +184,7 @@ export default function Edit() {
   const actionData = useActionData<ActionData>();
   const redirectTo = useRedirectTo() || "/app/dashboard";
   const initialCategoriesArray = getOptionsFromArray(
-    expense.categories?.split(",") || []
+    expense?.categories?.split(",") || []
   );
   const [selectedCategories, setSelectedCategories] = useState<SelectValue>(
     initialCategoriesArray.length >= 0 ? initialCategoriesArray : []

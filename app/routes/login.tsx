@@ -81,15 +81,20 @@ export async function action({ request }: ActionArgs) {
     return json({ formError: "Something went wrong", fields: { email } }, 500);
   }
 
-  const expiryDate = new Date();
-  const steCookie = remember
-    ? await authCookie.commitSession(session, {
-        expires: new Date(expiryDate.setMonth(expiryDate.getMonth() + 1)),
-      })
-    : await authCookie.commitSession(session);
+  // const expiryDate = new Date();
+  const setCookie =
+    remember === "on"
+      ? await authCookie.commitSession(session, {
+          // expires: new Date(expiryDate.setMonth(expiryDate.getMonth() + 1)),
+          maxAge: 60 * 60 * 24 * 30,
+        })
+      : await authCookie.commitSession(session);
   return redirect(safeRedirect(redirectTo, "/app"), {
     headers: {
-      "Set-Cookie": steCookie,
+      "Set-Cookie": await authCookie.commitSession(session, {
+        // expires: new Date(expiryDate.setMonth(expiryDate.getMonth() + 1)),
+        maxAge: remember === "on" ? 60 * 60 * 24 * 30 : undefined,
+      }),
     },
   });
 }

@@ -67,7 +67,6 @@ export const authCookie = createCookieSessionStorage({
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     secrets: [process.env.SESSION_SECRET],
-    // maxAge: 60 * 60 * 24 * 30,
     path: "/",
     sameSite: "lax",
   },
@@ -1034,6 +1033,94 @@ export async function insertCategory({ userId, category }: InsertCategoryArgs) {
     console.log("insertCategory ", error);
     return {
       success: false,
+      error: "Something went wrong",
+    };
+  }
+}
+
+type GetCategoryByIdArgs = {
+  id: Category["id"];
+};
+export async function getCategoryById({ id }: GetCategoryByIdArgs) {
+  try {
+    const { data: category, error } = await supabaseAdmin
+      .from("categories")
+      .select("*")
+      .eq("id", id)
+      .single();
+    if (error || !category) {
+      console.log("getCategoryById", error);
+      return {
+        error: error.message,
+      };
+    }
+
+    return { category };
+  } catch (error) {
+    // TODO: log error nicely
+    console.log("getCategoryById", error);
+    return {
+      error: "Something went wrong",
+    };
+  }
+}
+
+type UpdateCategoryByIdArgs = {
+  id: Category["id"];
+  query: Partial<Category>;
+};
+export async function updateCategoryById({
+  id,
+  query,
+}: UpdateCategoryByIdArgs) {
+  try {
+    const { data: category, error } = await supabaseAdmin
+      .from("categories")
+      .update({
+        ...query,
+      })
+      .eq("id", id)
+      .select("*")
+      .single();
+    if (error || !category) {
+      console.log("updateCategoryById", error);
+      return {
+        error: error.message,
+      };
+    }
+
+    return { category };
+  } catch (error) {
+    // TODO: log error nicely
+    console.log("updateCategoryById", error);
+    return {
+      error: "Something went wrong",
+    };
+  }
+}
+
+type DeleteCategoryArgs = {
+  id: Category["id"];
+};
+export async function deleteCategory({ id }: DeleteCategoryArgs) {
+  try {
+    const { error } = await supabaseAdmin
+      .from("categories")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.log("deleteCategory", error);
+      return {
+        success: false,
+      };
+    }
+
+    return { success: true };
+  } catch (error) {
+    // TODO: log error nicely
+    console.log("deleteCategory", error);
+    return {
       error: "Something went wrong",
     };
   }

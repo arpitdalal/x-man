@@ -119,9 +119,7 @@ export default function Categories() {
       <div className="px-5 pt-4 lg:px-20">
         <h1 className="text-3xl font-bold">Your Categories</h1>
         <div className="mt-5">
-          <MyLinkBtn
-            to={`new/income?redirectTo=${location.pathname}${location.search}`}
-          >
+          <MyLinkBtn to={`new/income?redirectTo=${location.pathname}`}>
             Add
           </MyLinkBtn>
         </div>
@@ -193,9 +191,7 @@ function Card({ category, editable }: CardProps) {
             <MyTooltip title={`Edit ${category.name}`}>
               <button type="button">
                 <Link
-                  to={`${isIncome ? "income/" : "expenses/"}${
-                    category.id
-                  }/edit?redirectTo=${location.pathname}${location.search}`}
+                  to={`edit/${category.id}?redirectTo=${location.pathname}`}
                   aria-label={`Edit ${category.name}`}
                 >
                   <EditIcon size="24" />
@@ -206,9 +202,7 @@ function Card({ category, editable }: CardProps) {
             <MyTooltip title={`Delete ${category.name}`}>
               <button type="button">
                 <Link
-                  to={`${isIncome ? "income/" : "expenses/"}${
-                    category.id
-                  }/delete?redirectTo=${location.pathname}${location.search}`}
+                  to={`delete/${category.id}?redirectTo=${location.pathname}`}
                   aria-label={`Delete ${category.name}`}
                 >
                   <Trash2Icon size="24" className="text-red-600" />

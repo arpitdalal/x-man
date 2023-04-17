@@ -44,20 +44,20 @@ import { HelpCircle } from "lucide-react";
 import MyTooltip from "~/components/MyTooltip";
 import PageOverlayCenter from "~/components/PageOverlayCenter";
 
-export const meta: MetaFunction = ({ data }) => {
-  if (!data?.income)
+export const meta: MetaFunction = ({ data }: { data: LoaderData }) => {
+  if (!data.income)
     return {
       title: "Not found | X Man",
     };
   return {
-    title: `Edit ${(data as unknown as LoaderData).income.title} | X Man`,
+    title: `Edit ${data.income.title} | X Man`,
   };
 };
 
 type LoaderData = {
   message: string;
-  categories: Array<Category>;
-  income: Income;
+  categories?: Array<Category>;
+  income: Income | null;
 };
 export async function loader({ request, params }: LoaderArgs) {
   const redirectTo = new URL(request.url).searchParams.get("redirectTo");
@@ -87,7 +87,7 @@ export async function loader({ request, params }: LoaderArgs) {
   });
   // const { income, error } = await getIncomeById({ incomeId: id, userId });
   if (!income || error) {
-    return json(
+    return json<LoaderData>(
       {
         message: "Not found.",
         income: null,
@@ -97,10 +97,10 @@ export async function loader({ request, params }: LoaderArgs) {
     );
   }
 
-  return json({
+  return json<LoaderData>({
     income,
-    message: "",
     categories: incomeCategories,
+    message: "",
   });
 }
 
@@ -177,7 +177,7 @@ export async function action({ params, request }: ActionArgs) {
         );
       }
 
-      return redirect(safeRedirect(redirectTo, "/app"));
+      return redirect(safeRedirect(redirectTo, "/app/dashboard"));
     },
     () => {
       throw unauthorized({
@@ -192,14 +192,16 @@ export default function Edit() {
   const actionData = useActionData<ActionData>();
   const redirectTo = useRedirectTo() || "/app/dashboard";
   const initialCategoriesArray = getOptionsFromArray(
-    income.categories?.split(",") || []
+    income?.categories?.split(",") || []
   );
   const [selectedCategories, setSelectedCategories] = useState<SelectValue>(
     initialCategoriesArray.length >= 0 ? initialCategoriesArray : null
   );
-  const [title, setTitle] = useState(actionData?.fields?.title || income.title);
+  const [title, setTitle] = useState(
+    actionData?.fields?.title || income?.title || ""
+  );
   const [amount, setAmount] = useState(
-    actionData?.fields?.amount || income.amount
+    actionData?.fields?.amount || income?.amount || ""
   );
   const [isInTenPer, setIsInTenPer] = useState<boolean>(
     actionData?.fields?.seva !== undefined

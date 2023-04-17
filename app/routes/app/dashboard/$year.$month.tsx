@@ -418,13 +418,13 @@ export default function Month() {
         </div>
         <div className="mt-8 flex flex-row gap-3">
           <MyLinkBtn
-            to={`income/new?redirectTo=${location.pathname}${location.search}`}
+            to={`income/new?redirectTo=${location.pathname}`}
             className="flex-1 bg-green-200 text-center text-night-700 transition-colors hover:bg-green-300 md:flex-none"
           >
             Add income
           </MyLinkBtn>
           <MyLinkBtn
-            to={`expenses/new?redirectTo=${location.pathname}${location.search}`}
+            to={`expenses/new?redirectTo=${location.pathname}`}
             className="flex-1 bg-red-200 text-center text-night-700 transition-colors hover:bg-red-300 md:flex-none"
           >
             Add expense
@@ -505,7 +505,7 @@ function Card({
               <Link
                 to={`${isIncome ? "income/" : "expenses/"}${
                   expenseOrIncome.id
-                }/edit?redirectTo=${location.pathname}${location.search}`}
+                }/edit?redirectTo=${location.pathname}`}
                 aria-label={`Edit ${expenseOrIncome.title}`}
               >
                 <EditIcon size="24" />
@@ -518,7 +518,7 @@ function Card({
               <Link
                 to={`${isIncome ? "income/" : "expenses/"}${
                   expenseOrIncome.id
-                }/delete?redirectTo=${location.pathname}${location.search}`}
+                }/delete?redirectTo=${location.pathname}`}
                 aria-label={`Delete ${expenseOrIncome.title}`}
               >
                 <Trash2Icon size="24" className="text-red-600" />

@@ -1,17 +1,17 @@
 import {
-  json,
-  type LoaderArgs,
-  redirect,
   type ActionArgs,
+  type LoaderArgs,
+  json,
+  redirect,
   type MetaFunction,
 } from "@remix-run/node";
+import { Form, useLoaderData } from "@remix-run/react";
 import { safeRedirect, unauthorized, useHydrated } from "remix-utils";
 import authenticated, {
   authCookie,
-  deleteIncome,
-  getIncomeById,
+  deleteCategory,
+  getCategoryById,
 } from "~/lib/supabase.server";
-import { Form, useLoaderData } from "@remix-run/react";
 import {
   Dialog,
   DialogContent,
@@ -20,26 +20,26 @@ import {
   DialogTitle,
   DialogDescription,
 } from "~/components/Dialog";
+import useRedirectTo from "~/hooks/useRedirectTo";
 import Button from "~/components/Button";
 import MyLinkBtn from "~/components/MyLinkBtn";
-import useRedirectTo from "~/hooks/useRedirectTo";
+import type { Category } from "~/types";
 import ModalMessage from "~/components/ModalMessage";
-import type { Income } from "~/types";
 import PageOverlayCenter from "~/components/PageOverlayCenter";
 
-export const meta: MetaFunction = ({ data }) => {
-  if (!data?.income)
+export const meta: MetaFunction = ({ data }: { data: LoaderData }) => {
+  if (!data.category)
     return {
       title: "Not found | X Man",
     };
   return {
-    title: `Delete ${(data as unknown as LoaderData).income.title} | X Man`,
+    title: `Edit ${data.category.name} | X Man`,
   };
 };
 
 type LoaderData = {
   message: string;
-  income: Income;
+  category?: Category;
 };
 export async function loader({ request, params }: LoaderArgs) {
   const redirectTo = new URL(request.url).searchParams.get("redirectTo");
@@ -51,43 +51,45 @@ export async function loader({ request, params }: LoaderArgs) {
   if (!userId || typeof userId !== "string") {
     throw unauthorized({
       message: "You must be logged in to access this page",
-      income: null,
     });
   }
 
   const id = params.id;
 
   if (!id) {
-    throw redirect(safeRedirect(redirectTo, "/app"));
+    throw redirect(safeRedirect(redirectTo, "/app/categories"));
   }
 
-  const { income, error } = await getIncomeById({ incomeId: id, userId });
-  if (!income || error) {
-    return json({ message: "Not found.", income: null }, 404);
+  const { category, error } = await getCategoryById({ id });
+  if (!category || error) {
+    return json<LoaderData>(
+      {
+        message: "Not found.",
+      },
+      404
+    );
   }
 
-  return json({
-    income: income,
+  return json<LoaderData>({
     message: "",
+    category,
   });
 }
 
-export async function action({ request, params }: ActionArgs) {
+export async function action({ params, request }: ActionArgs) {
   return await authenticated(
     request,
-    async (user) => {
+    async () => {
       const redirectTo = new URL(request.url).searchParams.get("redirectTo");
-
-      const userId = user.id;
 
       const id = params.id;
 
       if (!id) {
-        throw redirect(safeRedirect(redirectTo, "/app/dashboard"));
+        throw redirect(safeRedirect(redirectTo, "/app/categories"));
       }
 
-      await deleteIncome({ incomeId: id, userId });
-      return redirect(safeRedirect(redirectTo, "/app/dashboard"));
+      await deleteCategory({ id });
+      return redirect(safeRedirect(redirectTo, "/app/categories"));
     },
     () => {
       throw unauthorized({
@@ -97,9 +99,9 @@ export async function action({ request, params }: ActionArgs) {
   );
 }
 
-export default function Delete() {
-  const { income } = useLoaderData<typeof loader>();
-  const redirectTo = useRedirectTo() || "/app/dashboard";
+export default function Edit() {
+  const { category } = useLoaderData<LoaderData>();
+  const redirectTo = useRedirectTo() || "/app/categories";
   const isHydrated = useHydrated();
   if (!isHydrated) {
     return (
@@ -116,11 +118,11 @@ export default function Delete() {
     );
   }
 
-  if (!income) {
+  if (!category) {
     return (
       <ModalMessage
         title="Not found"
-        message="We couldn't find an income. Please head back to the month view"
+        message="We couldn't find the category. Please head back to the categories."
       />
     );
   }
@@ -130,23 +132,22 @@ export default function Delete() {
       <DialogContent className="sm:max-w-[450px]">
         <DialogHeader>
           <DialogTitle>
-            Are you sure you want to delete{" "}
-            <span className="mr-[2px] font-bold italic">{income.title}</span>?
+            Delete <span className="font-bold italic">{category.name}</span>
           </DialogTitle>
         </DialogHeader>
         <DialogDescription>
-          To delete <span className="font-bold italic">{income.title}</span>,
+          To delete <span className="font-bold italic">{category.name}</span>,
           click delete or cancel to go back.
         </DialogDescription>
         <Form method="post" replace className="flex flex-col gap-4">
           <DialogFooter>
             <div className="mt-3 flex gap-2">
-              <Button type="submit" className="bg-red-600 hover:bg-red-900">
-                delete
+              <Button className="bg-red-600 hover:bg-red-900" type="submit">
+                Delete
               </Button>
               <MyLinkBtn
                 btnType="outline"
-                to={redirectTo || "/app/dashboard"}
+                to={redirectTo || "/app/categories"}
                 type="submit"
               >
                 Cancel
