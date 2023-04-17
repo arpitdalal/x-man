@@ -59,6 +59,10 @@ export const links: LinksFunction = () => [
     href: "/icons/safari-pinned-tab.svg",
     color: "#6a44ff",
   },
+  {
+    rel: "apple-touch-startup-image",
+    href: "ios-startup.png",
+  },
 ];
 
 export async function loader({ request }: LoaderArgs) {
