@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "~/components/Dialog";
 import PageOverlayCenter from "~/components/PageOverlayCenter";
-import Tabs from "~/components/LinkTabs";
+import LinkTabs from "~/components/LinkTabs";
 import authenticated, { insertCategory } from "~/lib/supabase.server";
 
 type ActionData = {
@@ -95,108 +95,12 @@ export default function Add() {
         <DialogHeader>
           <DialogTitle>Add Category</DialogTitle>
         </DialogHeader>
-        <Tabs
+        <LinkTabs
           links={[
             { label: "Income", url: "income" },
             { label: "Expense", url: "expense" },
           ]}
         />
-        {/* <div className="mt-4 w-[400px]">
-          <div className="inline-flex items-center justify-center rounded-md bg-night-200 p-1 dark:bg-night-700">
-            <NavLink
-              to={`income${location.search}`}
-              className={({ isActive }) => {
-                return `inline-flex min-w-[100px] items-center justify-center rounded-[0.185rem] px-3 py-1.5  text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50${
-                  isActive
-                    ? " bg-white text-night-700 shadow-sm dark:bg-accent-purple dark:text-day-100"
-                    : ""
-                }`;
-              }}
-            >
-              Income
-            </NavLink>
-            <NavLink
-              to={`expense${location.search}`}
-              className={({ isActive }) => {
-                return `inline-flex min-w-[100px] items-center justify-center rounded-[0.185rem] px-3 py-1.5  text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50${
-                  isActive
-                    ? " bg-white text-night-700 shadow-sm dark:bg-accent-purple dark:text-day-100"
-                    : ""
-                }`;
-              }}
-            >
-              Expense
-            </NavLink>
-          </div>
-        </div> */}
-        {/* <Tabs defaultValue="income" className="mt-4 w-[400px]">
-          <TabsList>
-            <Link to={`income${location.search}`}>
-              <p>Income</p>
-            </Link>
-            <Link to={`expense${location.search}`}>
-              <p>Expense</p>
-            </Link>
-          </TabsList>
-          <TabsContent value="income">
-            <Form method="post" replace className="flex flex-col gap-4">
-              <input type="hidden" name="redirectTo" value={redirectTo} />
-              <input type="hidden" name="type" value="income" />
-              <div className="flex flex-col gap-2">
-                <TextInput
-                  label="Title"
-                  id="title"
-                  type="text"
-                  name="title"
-                  defaultValue={actionData?.fields?.title || ""}
-                  placeholder="Stocks"
-                  required
-                />
-              </div>
-              <DialogFooter>
-                <div className="mt-3 flex gap-2">
-                  <Button type="submit">Add</Button>
-                  <MyLinkBtn
-                    btnType="outline"
-                    to={redirectTo || "/app/categories"}
-                    type="submit"
-                  >
-                    Cancel
-                  </MyLinkBtn>
-                </div>
-              </DialogFooter>
-            </Form>
-          </TabsContent>
-          <TabsContent value="expense">
-            <Form method="post" replace className="flex flex-col gap-4">
-              <input type="hidden" name="redirectTo" value={redirectTo} />
-              <input type="hidden" name="type" value="expense" />
-              <div className="flex flex-col gap-2">
-                <TextInput
-                  label="Title"
-                  id="title"
-                  type="text"
-                  name="title"
-                  defaultValue={actionData?.fields?.title || ""}
-                  placeholder="Vacation"
-                  required
-                />
-              </div>
-              <DialogFooter>
-                <div className="mt-3 flex gap-2">
-                  <Button type="submit">Add</Button>
-                  <MyLinkBtn
-                    btnType="outline"
-                    to={redirectTo || "/app/categories"}
-                    type="submit"
-                  >
-                    Cancel
-                  </MyLinkBtn>
-                </div>
-              </DialogFooter>
-            </Form>
-          </TabsContent>
-        </Tabs> */}
         <Outlet />
       </DialogContent>
     </Dialog>

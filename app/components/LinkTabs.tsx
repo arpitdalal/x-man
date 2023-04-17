@@ -1,12 +1,12 @@
 import { NavLink, useLocation } from "@remix-run/react";
 
-type TabsProps = {
+type LinkTabsProps = {
   links: Array<{
     label: string;
     url: string;
   }>;
 };
-export default function Tabs({ links }: TabsProps) {
+export default function LinkTabs({ links }: LinkTabsProps) {
   const location = useLocation();
   return (
     <div className="mt-4 w-[400px]">

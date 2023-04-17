@@ -241,13 +241,13 @@ function DarkModeToggle({
       {/* note that the duration is longer then the one on body, controlling the bg-color */}
       <div className="relative h-8 w-8">
         <span
-          className="motion-reduce:duration-[0s] absolute inset-0 rotate-90 transform text-black transition duration-1000 dark:rotate-0 dark:text-white"
+          className="motion-reduce:duration-[0s] absolute inset-0 flex rotate-90 transform items-center justify-center text-black transition duration-1000 dark:rotate-0 dark:text-white"
           style={iconTransformOrigin}
         >
           <MoonIcon />
         </span>
         <span
-          className="motion-reduce:duration-[0s] absolute inset-0 rotate-0 transform text-black transition duration-1000 dark:-rotate-90 dark:text-white"
+          className="motion-reduce:duration-[0s] absolute inset-0 flex rotate-0 transform items-center justify-center text-black transition duration-1000 dark:-rotate-90 dark:text-white"
           style={iconTransformOrigin}
         >
           <SunIcon />
